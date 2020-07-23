@@ -9,6 +9,10 @@ import { ScriptState } from "./ScriptState";
 export class PortHandler {
   private port: chrome.runtime.Port;
   private removePort: () => void;
+  blocking: {
+    enable: () => void;
+    disable: () => void;
+  };
 
   constructor(tab: chrome.tabs.Tab, removePort: () => void) {
     this.port = chrome.tabs.connect(tab.id);
@@ -16,6 +20,10 @@ export class PortHandler {
 
     this.port.onDisconnect.addListener(this.onDisconnect);
     this.port.onMessage.addListener(this.portListener);
+    this.blocking = {
+      enable: this.enableBlocking,
+      disable: this.disableBlocking,
+    };
   }
 
   private onDisconnect = () => {
@@ -25,6 +33,18 @@ export class PortHandler {
 
   private portListener = () => {
     //TODO port listener
+  };
+
+  private enableBlocking = () => {
+    this.port.postMessage({
+      type: ScriptCommand.BLOCKING_ENABLE,
+    });
+  };
+
+  private disableBlocking = () => {
+    this.port.postMessage({
+      type: ScriptCommand.BLOCKING_DISABLE,
+    });
   };
 
   public initialize = (store: StoreState) => {
@@ -43,13 +63,6 @@ export class PortHandler {
   public disable = () => {
     this.port.postMessage({
       type: ScriptCommand.DISABLE,
-    });
-  };
-
-  public update = (update: ScriptUpdate) => {
-    this.port.postMessage({
-      type: ScriptCommand.UPDATE,
-      payload: update,
     });
   };
 
