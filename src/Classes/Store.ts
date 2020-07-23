@@ -9,7 +9,7 @@ export class Store {
       if ("store" in res) {
         this.storeState = { ...state, ...res.store };
       } else {
-        chrome.storage.sync.set({ store: this.storeState });
+        chrome.storage.sync.set({ store: { ...this.storeState } });
       }
     });
 
@@ -18,11 +18,11 @@ export class Store {
   }
 
   public getStore() {
-    return this.storeState;
+    return { ...this.storeState };
   }
 
   public setStore(newState: StoreState) {
-    this.storeState = newState;
+    this.storeState = { ...newState };
     this.publish();
     this.updateSyncStore();
   }
@@ -31,8 +31,8 @@ export class Store {
     return this.storeState[key];
   }
 
-  public set(key: keyof StoreState, val: any) {
-    this.storeState[key] = val;
+  public set(payload: Partial<StoreState>) {
+    this.storeState = { ...this.storeState, ...payload };
     this.publish();
     this.updateSyncStore();
   }
@@ -44,17 +44,17 @@ export class Store {
   private publish() {
     this.postMessage({
       type: EventMessage.STORE_UPDATED,
-      payload: this.storeState,
+      payload: { ...this.storeState },
     });
   }
 
   private updateSyncStore() {
-    chrome.storage.sync.set({ store: this.storeState });
+    chrome.storage.sync.set({ store: { ...this.storeState } });
   }
 
   private syncListener = (changes) => {
     if ("store" in changes) {
-      this.storeState = changes.store.newValue;
+      this.storeState = { ...changes.store.newValue };
       this.publish();
     }
   };
@@ -72,7 +72,7 @@ export class Store {
             break;
 
           case EventMessage.STORE_SET:
-            this.set(req.payload.key, req.payload.val);
+            this.set(req.payload);
             break;
 
           default:
