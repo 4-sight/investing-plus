@@ -1,9 +1,4 @@
-import {
-  ScriptCommand,
-  StoreState,
-  ScriptUpdate,
-  ScriptBatchUpdate,
-} from "../types";
+import { ScriptCommand, StoreState, ScriptBatchUpdate } from "../types";
 import { ScriptState } from "./ScriptState";
 
 export class PortHandler {
