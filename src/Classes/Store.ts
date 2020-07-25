@@ -60,6 +60,8 @@ export class Store {
   };
 
   private messageListener = (req, sender, sendResponse) => {
+    let isResponseAsync = false;
+
     if (typeof req === "object" && "type" in req) {
       if ("payload" in req) {
         switch (req.type) {
@@ -89,5 +91,7 @@ export class Store {
         }
       }
     }
+
+    return isResponseAsync;
   };
 }
