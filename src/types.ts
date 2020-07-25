@@ -1,4 +1,4 @@
-import { ScriptState } from "./Classes";
+import { PortHandler, ScriptState } from "./Classes";
 
 export enum EventMessage {
   "STORE_GET_STORE",
@@ -42,6 +42,8 @@ export enum ScriptCommand {
   "BLOCKING_DISABLE",
 }
 
-export type ScriptBatchUpdate = Partial<StoreState>;
+export type ScriptStateChanges = Partial<ScriptState>;
 
 export type StyleMap = Map<string, string>;
+
+export type Ports = Map<number, PortHandler>;

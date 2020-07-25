@@ -1,4 +1,4 @@
-import { ScriptCommand, StoreState, ScriptBatchUpdate } from "../types";
+import { ScriptCommand, StoreState, ScriptStateChanges } from "../types";
 import { ScriptState } from "./ScriptState";
 
 export class PortHandler {
@@ -61,7 +61,7 @@ export class PortHandler {
     });
   };
 
-  public batchUpdate = (updates: ScriptBatchUpdate) => {
+  public batchUpdate = (updates: ScriptStateChanges) => {
     this.port.postMessage({
       type: ScriptCommand.UPDATE_BATCH,
       payload: updates,
