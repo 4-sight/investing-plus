@@ -1,9 +1,10 @@
 import commandHandler, { portListener } from "../commandHandler";
 import { chrome } from "jest-chrome";
 import { EventMessage, ScriptCommand } from "../../types";
-import { MockPort, defaults } from "../../testHelpers";
-import { Runtime, Commands } from "jest-chrome/types/jest-chrome";
+import { MockPort } from "../../testHelpers";
+import { Runtime } from "jest-chrome/types/jest-chrome";
 import { Context, ScriptState } from "../../Classes";
+import { defaultStore } from "../../constants";
 
 describe("commandHandler", () => {
   // Setup
@@ -80,7 +81,7 @@ describe("portListener", () => {
   it("should call context.initializeStyles on command - INITIALIZE", () => {
     expect.assertions(3);
 
-    const mockState = new ScriptState(defaults.store);
+    const mockState = new ScriptState(defaultStore);
 
     expect(mockContext.initializeStyles).not.toHaveBeenCalled();
 
@@ -113,7 +114,7 @@ describe("portListener", () => {
   it("should call context.batchUpdateStyles on command - UPDATE_BATCH", () => {
     expect.assertions(3);
 
-    const mockState = new ScriptState(defaults.store);
+    const mockState = new ScriptState(defaultStore);
 
     expect(mockContext.batchUpdateStyles).not.toHaveBeenCalled();
 

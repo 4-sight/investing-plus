@@ -1,6 +1,6 @@
 import { EventHandler } from "./eventPage";
 import { chrome } from "jest-chrome";
-import { defaults } from "./testHelpers";
+import { defaultStore } from "./constants";
 
 describe("EventHandler", () => {
   beforeEach(() => {
@@ -8,7 +8,8 @@ describe("EventHandler", () => {
   });
 
   it("should be a Class", () => {
-    let h = new EventHandler(defaults.store);
+    expect.assertions(1);
+    let h = new EventHandler(defaultStore);
     expect(h).toBeInstanceOf(EventHandler);
   });
 });

@@ -1,6 +1,6 @@
 import { Context } from "../";
 import { ScriptState } from "../ScriptState";
-import { defaults } from "../../testHelpers";
+import { defaultStore } from "../../constants";
 import { getBlockingStyles } from "../../styleActions/userBlocking";
 
 describe("Context", () => {
@@ -49,7 +49,7 @@ describe("Context", () => {
     it("should call appendChild, with the expected style rules", () => {
       expect.assertions(4);
       const blockingStyleRules = getBlockingStyles(
-        defaults.store.blackList.map((user) => user.id)
+        defaultStore.blackList.map((user) => user.id)
       );
 
       expect(mockDoc.body.appendChild).not.toHaveBeenCalled();
@@ -58,7 +58,7 @@ describe("Context", () => {
 
       expect(mockDoc.body.appendChild).not.toHaveBeenCalled();
 
-      c.initializeStyles(new ScriptState(defaults.store));
+      c.initializeStyles(new ScriptState(defaultStore));
 
       expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(1);
       expect(
@@ -101,14 +101,12 @@ describe("Context", () => {
     it("should call appendChild with the expected style rules(1)", () => {
       expect.assertions(4);
       const blockingStyleRules = getBlockingStyles(
-        defaults.store.blackList.map((user) => user.id)
+        defaultStore.blackList.map((user) => user.id)
       );
 
       const c = new Context();
 
-      c.initializeStyles(
-        new ScriptState({ ...defaults.store, blocking: false })
-      );
+      c.initializeStyles(new ScriptState({ ...defaultStore, blocking: false }));
 
       expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(1);
       expect(
@@ -132,12 +130,12 @@ describe("Context", () => {
     it("should call appendChild with the expected style rules(2)", () => {
       expect.assertions(4);
       const blockingStyleRules = getBlockingStyles(
-        defaults.store.blackList.map((user) => user.id)
+        defaultStore.blackList.map((user) => user.id)
       );
 
       const c = new Context();
 
-      c.initializeStyles(new ScriptState({ ...defaults.store }));
+      c.initializeStyles(new ScriptState({ ...defaultStore }));
 
       expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(1);
       expect(
@@ -161,7 +159,7 @@ describe("Context", () => {
     it("should call appendChild with the expected style rules(3)", () => {
       expect.assertions(4);
       const blockingStyleRules = getBlockingStyles(
-        defaults.store.blackList.map((user) => user.id)
+        defaultStore.blackList.map((user) => user.id)
       );
       const newUser = {
         name: "new-user",
@@ -172,7 +170,7 @@ describe("Context", () => {
       ])}`;
 
       const c = new Context();
-      const baseState = { ...defaults.store };
+      const baseState = { ...defaultStore };
       const newState = { ...baseState };
       newState.blackList.push(newUser);
 
