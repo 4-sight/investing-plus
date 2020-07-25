@@ -42,8 +42,6 @@ export enum ScriptCommand {
   "BLOCKING_DISABLE",
 }
 
-export type ScriptUpdate = [keyof ScriptState, any];
-
 export type ScriptBatchUpdate = Partial<StoreState>;
 
 export type StyleMap = Map<string, string>;
