@@ -30,7 +30,9 @@ describe("ScriptStateStore", () => {
 
     const store = new ScriptStateStore(defaultState);
     expect(store.get("blocking")).toEqual(defaults.store.blocking);
-    store.overrideState({ blocking: false });
+    store.overrideState(
+      new ScriptState({ ...defaults.store, blocking: false })
+    );
 
     expect(store.get("blocking")).toEqual(false);
   });
