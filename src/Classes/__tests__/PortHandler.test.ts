@@ -1,12 +1,7 @@
 import { PortHandler } from "..";
 import { chrome } from "jest-chrome";
 import { defaults } from "../../testHelpers";
-import {
-  ScriptCommand,
-  Message,
-  ScriptUpdate,
-  ScriptBatchUpdate,
-} from "../../types";
+import { ScriptCommand, Message, ScriptBatchUpdate } from "../../types";
 import { ScriptState } from "../ScriptState";
 import { MockPort } from "../../testHelpers";
 
