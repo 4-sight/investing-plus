@@ -5,6 +5,13 @@ import { isMessage } from "../utils";
 type Listener = (req: any) => boolean;
 type SetStore = React.Dispatch<React.SetStateAction<StoreState>>;
 
+const defaultStore: StoreState = {
+  blocking: true,
+  enabled: true,
+  blackList: [],
+  whiteList: [],
+};
+
 const connect = (setStore: SetStore, listener: Listener) => {
   chrome.runtime.sendMessage(
     { type: EventMessage.STORE_GET_STORE },
@@ -38,8 +45,10 @@ const dispatch: StoreDispatch = (payload) => {
 
 //===============================================================
 
-export default function useStore(): [StoreState, StoreDispatch] {
-  const [store, setStore] = useState<StoreState>({} as StoreState);
+export default function useStore(
+  initialStore?: StoreState
+): [StoreState, StoreDispatch] {
+  const [store, setStore] = useState<StoreState>(initialStore || defaultStore);
   const listener = useMemo(() => getListener(setStore), [setStore]);
 
   useEffect(() => {
@@ -48,7 +57,7 @@ export default function useStore(): [StoreState, StoreDispatch] {
     return () => {
       disconnect(listener);
     };
-  });
+  }, []);
 
   return [store, dispatch];
 }
