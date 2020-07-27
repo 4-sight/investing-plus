@@ -6,7 +6,7 @@ import { renderHook, act } from "@testing-library/react-hooks";
 import { useStore } from "../";
 import { chrome } from "jest-chrome";
 import { EventMessage } from "../../types";
-import { defaultStore } from "../../constants";
+import { defaults } from "../../testHelpers";
 
 describe("useStore", () => {
   // Setup
@@ -53,9 +53,9 @@ describe("useStore", () => {
   it("should return the store and a dispatch function", () => {
     expect.assertions(2);
 
-    const { result } = renderHook(() => useStore(defaultStore));
+    const { result } = renderHook(() => useStore(defaults.store));
 
-    expect(result.current[0]).toEqual(defaultStore);
+    expect(result.current[0]).toEqual(defaults.store);
     expect(result.current[1]).toBeInstanceOf(Function);
   });
 
@@ -66,7 +66,7 @@ describe("useStore", () => {
       result: {
         current: [_, dispatch],
       },
-    } = renderHook(() => useStore(defaultStore));
+    } = renderHook(() => useStore(defaults.store));
 
     expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
     dispatch({ blocking: false });
@@ -80,7 +80,7 @@ describe("useStore", () => {
   it("should update store on STORE_UPDATED", () => {
     expect.assertions(2);
 
-    const { result } = renderHook(() => useStore(defaultStore));
+    const { result } = renderHook(() => useStore(defaults.store));
 
     expect(result.current[0].blocking).toBe(true);
 
@@ -89,7 +89,7 @@ describe("useStore", () => {
         {
           type: EventMessage.STORE_UPDATED,
           payload: {
-            ...defaultStore,
+            ...defaults.store,
             blocking: false,
           },
         },

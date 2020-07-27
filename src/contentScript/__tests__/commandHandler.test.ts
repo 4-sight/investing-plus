@@ -4,7 +4,7 @@ import { EventMessage, ScriptCommand } from "../../types";
 import { MockPort } from "../../testHelpers";
 import { Runtime } from "jest-chrome/types/jest-chrome";
 import { Context, ScriptState } from "../../Classes";
-import { defaultStore } from "../../constants";
+import { defaults } from "../../testHelpers";
 
 describe("commandHandler", () => {
   // Setup
@@ -81,7 +81,7 @@ describe("portListener", () => {
   it("should call context.initializeStyles on command - INITIALIZE", () => {
     expect.assertions(3);
 
-    const mockState = new ScriptState(defaultStore);
+    const mockState = new ScriptState(defaults.store);
 
     expect(mockContext.initializeStyles).not.toHaveBeenCalled();
 
@@ -114,7 +114,7 @@ describe("portListener", () => {
   it("should call context.batchUpdateStyles on command - UPDATE_BATCH", () => {
     expect.assertions(3);
 
-    const mockState = new ScriptState(defaultStore);
+    const mockState = new ScriptState(defaults.store);
 
     expect(mockContext.batchUpdateStyles).not.toHaveBeenCalled();
 

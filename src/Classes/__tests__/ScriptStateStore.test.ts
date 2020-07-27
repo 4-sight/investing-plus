@@ -1,11 +1,11 @@
 import { ScriptStateStore } from "../";
 import { ScriptState } from "../ScriptState";
-import { defaultStore } from "../../constants";
+import { defaults } from "../../testHelpers";
 
 describe("ScriptStateStore", () => {
   //Setup
 
-  const defaultState = new ScriptState(defaultStore);
+  const defaultState = new ScriptState(defaults.store);
   //============================================
 
   it("should have a getter", () => {
@@ -13,14 +13,14 @@ describe("ScriptStateStore", () => {
 
     const store = new ScriptStateStore(defaultState);
 
-    expect(store.get("blocking")).toEqual(defaultStore.blocking);
+    expect(store.get("blocking")).toEqual(defaults.store.blocking);
   });
 
   it("should have a setter", () => {
     expect.assertions(2);
 
     const store = new ScriptStateStore(defaultState);
-    expect(store.get("blocking")).toEqual(defaultStore.blocking);
+    expect(store.get("blocking")).toEqual(defaults.store.blocking);
     store.set("blocking", false);
     expect(store.get("blocking")).toEqual(false);
   });
@@ -29,8 +29,10 @@ describe("ScriptStateStore", () => {
     expect.assertions(2);
 
     const store = new ScriptStateStore(defaultState);
-    expect(store.get("blocking")).toEqual(defaultStore.blocking);
-    store.overrideState(new ScriptState({ ...defaultStore, blocking: false }));
+    expect(store.get("blocking")).toEqual(defaults.store.blocking);
+    store.overrideState(
+      new ScriptState({ ...defaults.store, blocking: false })
+    );
 
     expect(store.get("blocking")).toEqual(false);
   });

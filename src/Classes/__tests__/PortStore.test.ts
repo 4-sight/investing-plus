@@ -2,7 +2,7 @@ import { PortStore } from "../";
 import { Ports } from "../../types";
 import { PortHandler } from "../PortHandler";
 import { MockPort } from "../../testHelpers";
-import { defaultStore } from "../../constants";
+import { defaults } from "../../testHelpers";
 import { chrome } from "jest-chrome";
 import { ScriptState } from "../ScriptState";
 
@@ -129,7 +129,7 @@ describe("PortStore", () => {
 
       expect(mockPort.batchUpdate).not.toHaveBeenCalled();
 
-      portStore.updatePorts([new ScriptState(defaultStore), 4]);
+      portStore.updatePorts([new ScriptState(defaults.store), 4]);
 
       expect(mockPort.batchUpdate).toHaveBeenCalledTimes(3);
     });

@@ -7,7 +7,7 @@ import Popup from "../popup";
 import { render, fireEvent } from "@testing-library/react";
 import { mockError, getProperties } from "../../testHelpers";
 import { useStore } from "../../hooks";
-import { defaultStore } from "../../constants";
+import { defaults } from "../../testHelpers";
 
 jest.mock("../../hooks/useStore");
 const mockUseStore = useStore as jest.Mock;
@@ -16,7 +16,7 @@ describe("Popup", () => {
   // Setup
   const defaultProps = {};
   const mockDispatch = jest.fn();
-  const mockStore = { ...defaultStore };
+  const mockStore = { ...defaults.store };
   mockUseStore.mockReturnValue([mockStore, mockDispatch]);
 
   beforeEach(() => {
@@ -53,7 +53,7 @@ describe("Popup", () => {
     popup1.unmount();
 
     mockUseStore.mockReturnValueOnce([
-      { ...defaultStore, blocking: false },
+      { ...defaults.store, blocking: false },
       mockDispatch,
     ]);
     const popup2 = render(<Popup {...defaultProps} />);
@@ -83,7 +83,7 @@ describe("Popup", () => {
 
     expect(mockDispatch).toHaveBeenCalledTimes(1);
     expect(mockDispatch).toHaveBeenCalledWith({
-      blocking: !defaultStore.blocking,
+      blocking: !defaults.store.blocking,
     });
   });
 });

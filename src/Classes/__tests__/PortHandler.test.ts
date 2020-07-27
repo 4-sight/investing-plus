@@ -1,6 +1,6 @@
 import { PortHandler } from "..";
 import { chrome } from "jest-chrome";
-import { defaultStore } from "../../constants";
+import { defaults } from "../../testHelpers";
 import { ScriptCommand, Message, ScriptStateChanges } from "../../types";
 import { ScriptState } from "../ScriptState";
 import { MockPort } from "../../testHelpers";
@@ -74,7 +74,7 @@ describe("Port", () => {
       expect.assertions(4);
       const port = new PortHandler(defaultTab, () => {});
       expect(mockPort.postMessage).not.toHaveBeenCalled();
-      port.initialize(defaultStore);
+      port.initialize(defaults.store);
       expect(mockPort.postMessage).toHaveBeenCalledTimes(1);
       const message = mockPort.postMessage.mock.calls[0][0] as Message;
       expect(message.type).toEqual(ScriptCommand.INITIALIZE);
