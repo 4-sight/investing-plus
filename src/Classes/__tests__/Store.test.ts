@@ -17,13 +17,13 @@ describe("Store", () => {
 
   it("should be a Class", () => {
     expect.assertions(1);
-    let s = new Store(defaults.store);
+    let s = new Store(defaults.store, () => {});
     expect(s).toBeInstanceOf(Store);
   });
 
   it("should have a getStore method that returns the store state", () => {
     expect.assertions(1);
-    let store = new Store(defaults.store);
+    let store = new Store(defaults.store, () => {});
 
     expect(store.getStore()).toEqual(defaults.store);
   });
@@ -36,7 +36,7 @@ describe("Store", () => {
       blocking: false,
     };
 
-    let store = new Store(defaults.store);
+    let store = new Store(defaults.store, () => {});
 
     expect(store.getStore()).toEqual(defaults.store);
     store.setStore(newState);
@@ -45,14 +45,14 @@ describe("Store", () => {
 
   it("should have a get method that returns a store state value", () => {
     expect.assertions(1);
-    const store = new Store(defaults.store);
+    const store = new Store(defaults.store, () => {});
 
     expect(store.get("enabled")).toEqual(defaults.store.enabled);
   });
 
   it("should have a set method that sets a value in store state", () => {
     expect.assertions(2);
-    const store = new Store(defaults.store);
+    const store = new Store(defaults.store, () => {});
 
     expect(store.get("enabled")).toEqual(defaults.store.enabled);
     store.set({ enabled: false });
@@ -62,7 +62,7 @@ describe("Store", () => {
   it("should publish the new store state on change", () => {
     expect.assertions(4);
     expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
-    const store = new Store(defaults.store);
+    const store = new Store(defaults.store, () => {});
 
     expect(store.get("enabled")).toEqual(defaults.store.enabled);
     store.set({ enabled: false });
@@ -76,7 +76,7 @@ describe("Store", () => {
   it("should set sync storage on update", () => {
     expect.assertions(4);
     expect(chrome.storage.sync.set).not.toHaveBeenCalled();
-    const store = new Store(defaults.store);
+    const store = new Store(defaults.store, () => {});
     expect(chrome.storage.sync.set).not.toHaveBeenCalled();
 
     store.set({ enabled: false });
@@ -101,7 +101,7 @@ describe("Store", () => {
     expect(chrome.storage.sync.get).not.toHaveBeenCalled();
     expect(chrome.storage.sync.set).not.toHaveBeenCalled();
 
-    const store1 = new Store(defaults.store);
+    const store1 = new Store(defaults.store, () => {});
     expect(store1.getStore()).toEqual(defaults.store);
     expect(chrome.storage.sync.set).toHaveBeenCalled();
     expect(chrome.storage.sync.set).toHaveBeenCalledWith({
@@ -112,7 +112,7 @@ describe("Store", () => {
       cb({ store: syncStore });
     });
 
-    const store2 = new Store(defaults.store);
+    const store2 = new Store(defaults.store, () => {});
     expect(store2.getStore()).not.toEqual(defaults.store);
     expect(store2.getStore()).toEqual(syncStore);
   });
@@ -126,7 +126,7 @@ describe("Store", () => {
     };
 
     expect(chrome.storage.onChanged.hasListeners()).toBe(false);
-    const store = new Store(defaults.store);
+    const store = new Store(defaults.store, () => {});
     expect(chrome.storage.onChanged.hasListeners()).toBe(true);
     expect(store.getStore()).toEqual(defaults.store);
 
@@ -143,7 +143,7 @@ describe("Store", () => {
     const sendResponseSpy = jest.fn();
 
     expect(chrome.runtime.onMessage.hasListeners()).toBe(false);
-    new Store(defaults.store);
+    new Store(defaults.store, () => {});
     expect(chrome.runtime.onMessage.hasListeners()).toBe(true);
 
     expect(sendResponseSpy).not.toHaveBeenCalled();
@@ -172,7 +172,7 @@ describe("Store", () => {
   it("should return a store value on STORE_GET", () => {
     expect.assertions(5);
     const sendResponseSpy = jest.fn();
-    const store = new Store(defaults.store);
+    const store = new Store(defaults.store, () => {});
 
     expect(sendResponseSpy).not.toHaveBeenCalled();
 
@@ -205,7 +205,7 @@ describe("Store", () => {
       enabled: false,
       blocking: false,
     };
-    const store = new Store(defaults.store);
+    const store = new Store(defaults.store, () => {});
     expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
 
     expect(store.getStore()).toEqual(defaults.store);
@@ -226,7 +226,7 @@ describe("Store", () => {
 
   it("should set a new store value and publish on STORE_SET", () => {
     expect.assertions(5);
-    const store = new Store(defaults.store);
+    const store = new Store(defaults.store, () => {});
     expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
 
     expect(store.getStore()).toEqual(defaults.store);
@@ -243,5 +243,49 @@ describe("Store", () => {
       type: EventMessage.STORE_UPDATED,
       payload: { ...defaults.store, enabled: false },
     });
+  });
+
+  it("should call portUpdate on publish, with the script changes", () => {
+    expect.assertions(3);
+    const mockPortUpdate = jest.fn();
+    new Store(defaults.store, mockPortUpdate);
+    expect(mockPortUpdate).not.toHaveBeenCalled();
+
+    chrome.runtime.onMessage.callListeners(
+      { type: EventMessage.STORE_SET, payload: { blocking: false } },
+      {},
+      () => {}
+    );
+
+    expect(mockPortUpdate).toHaveBeenCalledTimes(1);
+    expect(mockPortUpdate).toBeCalledWith([{ blocking: false }, 1]);
+  });
+
+  it("should have a getChanges method that returns the last changes", () => {
+    expect.assertions(4);
+
+    const store = new Store(defaults.store, () => {});
+
+    expect(store.getChanges()).toEqual([{}, 0]);
+
+    store.set({ enabled: false });
+
+    expect(store.getChanges()).toEqual([{ enabled: false }, 1]);
+
+    store.set({ blocking: false });
+
+    expect(store.getChanges()).toEqual([{ blocking: false }, 1]);
+
+    const newState = {
+      ...defaults.store,
+      blackList: [{ name: "new-test-user", id: "80979" }],
+    };
+
+    store.setStore(newState);
+
+    expect(store.getChanges()).toEqual([
+      newState,
+      Object.keys(newState).length,
+    ]);
   });
 });

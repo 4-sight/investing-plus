@@ -1,10 +1,19 @@
 import { EventMessage, Message, StoreState } from "../types";
+import { ScriptState } from "./ScriptState";
+import { getScriptChanges } from "../utils";
 
 export class Store {
   private storeState: StoreState;
+  private changes: Partial<StoreState>;
+  private portUpdate: (changes: [Partial<ScriptState>, number]) => void;
 
-  constructor(state: StoreState) {
+  constructor(
+    state: StoreState,
+    onUpdate: (changes: [Partial<ScriptState>, number]) => void
+  ) {
     this.storeState = { ...state };
+    this.changes = {};
+    this.portUpdate = onUpdate;
     chrome.storage.sync.get(["store"], (res) => {
       if ("store" in res) {
         this.storeState = { ...state, ...res.store };
@@ -23,6 +32,7 @@ export class Store {
 
   public setStore(newState: StoreState) {
     this.storeState = { ...newState };
+    this.setChanges(newState);
     this.publish();
     this.updateSyncStore();
   }
@@ -33,8 +43,17 @@ export class Store {
 
   public set(payload: Partial<StoreState>) {
     this.storeState = { ...this.storeState, ...payload };
+    this.setChanges(payload);
     this.publish();
     this.updateSyncStore();
+  }
+
+  public getChanges(): [Partial<StoreState>, number] {
+    return [this.changes, Object.keys(this.changes).length];
+  }
+
+  private setChanges(stateUpdate: Partial<StoreState>) {
+    this.changes = stateUpdate;
   }
 
   private postMessage({ type, payload }: Message) {
@@ -46,6 +65,8 @@ export class Store {
       type: EventMessage.STORE_UPDATED,
       payload: { ...this.storeState },
     });
+    const scriptChanges = getScriptChanges(this.getChanges()[0]);
+    this.portUpdate(scriptChanges);
   }
 
   private updateSyncStore() {
