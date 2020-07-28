@@ -1,6 +1,6 @@
 import commandHandler, { portListener } from "../commandHandler";
 import { chrome } from "jest-chrome";
-import { EventMessage, ScriptCommand } from "../../types";
+import { EventMessage, ScriptCommand, Blocking } from "../../types";
 import { MockPort } from "../../testHelpers";
 import { Runtime } from "jest-chrome/types/jest-chrome";
 import { Context, ScriptState } from "../../Classes";
@@ -58,10 +58,7 @@ describe("portListener", () => {
     enable: jest.fn(),
     disable: jest.fn(),
     batchUpdateStyles: jest.fn(),
-    blocking: {
-      enable: jest.fn(),
-      disable: jest.fn(),
-    },
+    setBlocking: jest.fn(),
   };
 
   const listener = portListener((mockContext as unknown) as Context);
@@ -72,9 +69,6 @@ describe("portListener", () => {
         v.mockClear();
       }
     });
-
-    mockContext.blocking.enable.mockClear();
-    mockContext.blocking.disable.mockClear();
   });
   //==========================================
 
@@ -124,23 +118,14 @@ describe("portListener", () => {
     expect(mockContext.batchUpdateStyles).toHaveBeenCalledWith(mockState);
   });
 
-  it("should call context.blocking.enable on command - BLOCKING_ENABLE", () => {
-    expect.assertions(2);
+  it("should call context.setBlocking with the payload, on command - BLOCKING_SET", () => {
+    expect.assertions(3);
 
-    expect(mockContext.blocking.enable).not.toHaveBeenCalled();
+    expect(mockContext.setBlocking).not.toHaveBeenCalled();
 
-    listener({ type: ScriptCommand.BLOCKING_ENABLE });
+    listener({ type: ScriptCommand.BLOCKING_SET, payload: Blocking.BLACKLIST });
 
-    expect(mockContext.blocking.enable).toHaveBeenCalledTimes(1);
-  });
-
-  it("should call context.blocking.disable on command - BLOCKING_DISABLE", () => {
-    expect.assertions(2);
-
-    expect(mockContext.blocking.disable).not.toHaveBeenCalled();
-
-    listener({ type: ScriptCommand.BLOCKING_DISABLE });
-
-    expect(mockContext.blocking.disable).toHaveBeenCalledTimes(1);
+    expect(mockContext.setBlocking).toHaveBeenCalledTimes(1);
+    expect(mockContext.setBlocking).toHaveBeenCalledWith(Blocking.BLACKLIST);
   });
 });

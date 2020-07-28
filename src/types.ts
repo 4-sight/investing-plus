@@ -1,5 +1,11 @@
 import { PortHandler, ScriptState } from "./Classes";
 
+export enum Blocking {
+  "BLACKLIST",
+  "WHITELIST",
+  "NONE",
+}
+
 export enum EventMessage {
   "STORE_GET_STORE",
   "STORE_OVERRIDE",
@@ -26,7 +32,7 @@ export type User = {
 
 export type StoreState = {
   enabled: boolean;
-  blocking: boolean;
+  blocking: Blocking;
   blackList: User[];
   whiteList: User[];
   hidden: boolean;
@@ -39,8 +45,7 @@ export enum ScriptCommand {
   "ENABLE",
   "DISABLE",
   "UPDATE_BATCH",
-  "BLOCKING_ENABLE",
-  "BLOCKING_DISABLE",
+  "BLOCKING_SET",
 }
 
 export type ScriptStateChanges = Partial<ScriptState>;

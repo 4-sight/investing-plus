@@ -1,6 +1,7 @@
 import { ScriptStateStore } from "../";
 import { ScriptState } from "../ScriptState";
 import { defaults } from "../../testHelpers";
+import { Blocking } from "../../types";
 
 describe("ScriptStateStore", () => {
   //Setup
@@ -31,9 +32,9 @@ describe("ScriptStateStore", () => {
     const store = new ScriptStateStore(defaultState);
     expect(store.get("blocking")).toEqual(defaults.store.blocking);
     store.overrideState(
-      new ScriptState({ ...defaults.store, blocking: false })
+      new ScriptState({ ...defaults.store, blocking: Blocking.WHITELIST })
     );
 
-    expect(store.get("blocking")).toEqual(false);
+    expect(store.get("blocking")).toEqual(Blocking.WHITELIST);
   });
 });

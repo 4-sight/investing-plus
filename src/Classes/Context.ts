@@ -1,31 +1,23 @@
-import { StyleMap, User } from "../types";
+import { StyleMap, User, Blocking } from "../types";
 import { ScriptStateStore } from "./ScriptStateStore";
 import { ScriptState } from "./ScriptState";
-import { userBlocking } from "../styleActions";
+import { blackList, whiteList } from "../styleActions";
 
 export class Context {
   private sheet: HTMLStyleElement;
   private styles: StyleMap;
   private store: ScriptStateStore;
-  blocking: {
-    enable: () => void;
-    disable: () => void;
-  };
 
   constructor() {
     this.sheet = document.createElement("style");
     this.styles = new Map();
     this.store;
-    this.blocking = {
-      enable: this.enableBlocking,
-      disable: this.disableBlocking,
-    };
   }
 
   // Private methods ====================================
 
   private createStylesRules = () => {
-    this.store.get("blocking") && this.blockUsers();
+    this.handleBlocking(this.store.get("blocking"));
   };
 
   private insertPageStyles = () => {
@@ -47,16 +39,50 @@ export class Context {
     this.addStylesToDocument();
   };
 
-  private blockUsers = () => {
+  private addBlackList = () => {
     const blackListIds = this.store
       .get("blackList")
       ?.map((user: User) => user.id);
 
-    blackListIds && userBlocking.enable(this.styles, blackListIds);
+    blackListIds && blackList.enable(this.styles, blackListIds);
   };
 
-  private unblockUsers = () => {
-    userBlocking.disable(this.styles);
+  private removeBlackList = () => {
+    blackList.disable(this.styles);
+  };
+
+  private addWhiteList = () => {
+    const whiteListIds = this.store
+      .get("whiteList")
+      ?.map((user: User) => user.id);
+
+    whiteListIds && whiteList.enable(this.styles, whiteListIds);
+  };
+
+  private removeWhiteList = () => {
+    whiteList.disable(this.styles);
+  };
+
+  private handleBlocking = (mode: Blocking) => {
+    switch (mode) {
+      case Blocking.BLACKLIST:
+        this.store.set("blocking", Blocking.BLACKLIST);
+        this.removeWhiteList();
+        this.addBlackList();
+        break;
+
+      case Blocking.WHITELIST:
+        this.store.set("blocking", Blocking.WHITELIST);
+        this.removeBlackList();
+        this.addWhiteList();
+        break;
+
+      case Blocking.NONE:
+        this.store.set("blocking", Blocking.NONE);
+        this.removeBlackList();
+        this.removeWhiteList();
+        break;
+    }
   };
 
   // Public Methods =======================================
@@ -85,15 +111,8 @@ export class Context {
     this.updatePageStyles();
   };
 
-  enableBlocking = () => {
-    this.store.set("blocking", true);
-    this.blockUsers();
-    this.updatePageStyles();
-  };
-
-  disableBlocking = () => {
-    this.store.set("blocking", false);
-    this.unblockUsers();
+  setBlocking = (mode: Blocking) => {
+    this.handleBlocking(mode);
     this.updatePageStyles();
   };
 }

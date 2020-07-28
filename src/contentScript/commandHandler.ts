@@ -29,12 +29,8 @@ export const portListener = (context: Context) => ({
       context.batchUpdateStyles(payload);
       break;
 
-    case ScriptCommand.BLOCKING_ENABLE:
-      context.blocking.enable();
-      break;
-
-    case ScriptCommand.BLOCKING_DISABLE:
-      context.blocking.disable();
+    case ScriptCommand.BLOCKING_SET:
+      context.setBlocking(payload);
       break;
 
     default:

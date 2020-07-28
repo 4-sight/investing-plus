@@ -1,7 +1,12 @@
 import { PortHandler } from "..";
 import { chrome } from "jest-chrome";
 import { defaults } from "../../testHelpers";
-import { ScriptCommand, Message, ScriptStateChanges } from "../../types";
+import {
+  ScriptCommand,
+  Message,
+  ScriptStateChanges,
+  Blocking,
+} from "../../types";
 import { ScriptState } from "../ScriptState";
 import { MockPort } from "../../testHelpers";
 
@@ -111,7 +116,7 @@ describe("Port", () => {
   describe("Port.batchUpdate", () => {
     it("should call postMessage with UPDATE_BATCH and a ScriptUpdate", () => {
       expect.assertions(4);
-      const updates: ScriptStateChanges = { blocking: false };
+      const updates: ScriptStateChanges = { blocking: Blocking.BLACKLIST };
       const port = new PortHandler(defaultTab, () => {});
       expect(mockPort.postMessage).not.toHaveBeenCalled();
       port.batchUpdate(updates);
@@ -122,29 +127,29 @@ describe("Port", () => {
     });
   });
 
-  describe("Port.blocking.enable", () => {
-    it("should call postMessage with BLOCKING_ENABLE", () => {
-      expect.assertions(4);
+  describe("Port.setBlocking", () => {
+    it("should call postMessage with BLOCKING_SET and the expected payload", () => {
+      expect.assertions(10);
       const port = new PortHandler(defaultTab, () => {});
       expect(mockPort.postMessage).not.toHaveBeenCalled();
-      port.blocking.enable();
-      expect(mockPort.postMessage).toHaveBeenCalledTimes(1);
-      const message = mockPort.postMessage.mock.calls[0][0] as Message;
-      expect(message.type).toEqual(ScriptCommand.BLOCKING_ENABLE);
-      expect(message.payload).toBeUndefined();
-    });
-  });
 
-  describe("Port.blocking.disable", () => {
-    it("should call postMessage with BLOCKING_DISABLE", () => {
-      expect.assertions(4);
-      const port = new PortHandler(defaultTab, () => {});
-      expect(mockPort.postMessage).not.toHaveBeenCalled();
-      port.blocking.disable();
+      port.setBlocking(Blocking.BLACKLIST);
       expect(mockPort.postMessage).toHaveBeenCalledTimes(1);
-      const message = mockPort.postMessage.mock.calls[0][0] as Message;
-      expect(message.type).toEqual(ScriptCommand.BLOCKING_DISABLE);
-      expect(message.payload).toBeUndefined();
+      const message1 = mockPort.postMessage.mock.calls[0][0] as Message;
+      expect(message1.type).toEqual(ScriptCommand.BLOCKING_SET);
+      expect(message1.payload).toEqual(Blocking.BLACKLIST);
+
+      port.setBlocking(Blocking.WHITELIST);
+      expect(mockPort.postMessage).toHaveBeenCalledTimes(2);
+      const message2 = mockPort.postMessage.mock.calls[1][0] as Message;
+      expect(message2.type).toEqual(ScriptCommand.BLOCKING_SET);
+      expect(message2.payload).toEqual(Blocking.WHITELIST);
+
+      port.setBlocking(Blocking.NONE);
+      expect(mockPort.postMessage).toHaveBeenCalledTimes(3);
+      const message3 = mockPort.postMessage.mock.calls[2][0] as Message;
+      expect(message3.type).toEqual(ScriptCommand.BLOCKING_SET);
+      expect(message3.payload).toEqual(Blocking.NONE);
     });
   });
 });

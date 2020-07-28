@@ -1,5 +1,5 @@
 import { PortStore } from "../";
-import { Ports } from "../../types";
+import { Ports, Blocking } from "../../types";
 import { PortHandler } from "../PortHandler";
 import { MockPort } from "../../testHelpers";
 import { defaults } from "../../testHelpers";
@@ -17,23 +17,13 @@ describe("PortStore", () => {
     enable: jest.fn(),
     disable: jest.fn(),
     batchUpdate: jest.fn(),
-    blocking: {
-      enable: jest.fn(),
-      disable: jest.fn(),
-    },
+    setBlocking: jest.fn(),
   };
 
   beforeEach(() => {
     Object.values(mockPortHandler).forEach((val) => {
       if ("mockClear" in val) {
         val.mockClear();
-      } else {
-        if ("enable" in val) {
-          val.enable.mockClear();
-        }
-        if ("disable" in val) {
-          val.disable.mockClear();
-        }
       }
     });
   });
@@ -132,8 +122,8 @@ describe("PortStore", () => {
       expect(mockPort.disable).toHaveBeenCalledTimes(3);
     });
 
-    it("should call blocking enable if change == { blocking: true }", () => {
-      expect.assertions(2);
+    it("should call setBlocking with a blocking mode if blocking has changed", () => {
+      expect.assertions(3);
 
       const mockPortMap: Ports = new Map();
       const portStore = new PortStore(mockPortMap);
@@ -143,29 +133,12 @@ describe("PortStore", () => {
       portStore.addPort(34567, (mockPortHandler as unknown) as PortHandler);
       const mockPort = mockPortMap.get(12345);
 
-      expect(mockPort.blocking.enable).not.toHaveBeenCalled();
+      expect(mockPort.setBlocking).not.toHaveBeenCalled();
 
-      portStore.updatePorts([{ blocking: true }, 1]);
+      portStore.updatePorts([{ blocking: Blocking.WHITELIST }, 1]);
 
-      expect(mockPort.blocking.enable).toHaveBeenCalledTimes(3);
-    });
-
-    it("should call blocking disable if change == { blocking: false }", () => {
-      expect.assertions(2);
-
-      const mockPortMap: Ports = new Map();
-      const portStore = new PortStore(mockPortMap);
-
-      portStore.addPort(12345, (mockPortHandler as unknown) as PortHandler);
-      portStore.addPort(23456, (mockPortHandler as unknown) as PortHandler);
-      portStore.addPort(34567, (mockPortHandler as unknown) as PortHandler);
-      const mockPort = mockPortMap.get(12345);
-
-      expect(mockPort.blocking.disable).not.toHaveBeenCalled();
-
-      portStore.updatePorts([{ blocking: false }, 1]);
-
-      expect(mockPort.blocking.disable).toHaveBeenCalledTimes(3);
+      expect(mockPort.setBlocking).toHaveBeenCalledTimes(3);
+      expect(mockPort.setBlocking).toHaveBeenCalledWith(Blocking.WHITELIST);
     });
   });
 });

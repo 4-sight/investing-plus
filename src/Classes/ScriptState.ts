@@ -1,8 +1,8 @@
-import { StoreState, User } from "../types";
+import { StoreState, User, Blocking } from "../types";
 
 export class ScriptState {
   enabled: boolean;
-  blocking: boolean;
+  blocking: Blocking;
   blackList: User[];
   whiteList: User[];
 

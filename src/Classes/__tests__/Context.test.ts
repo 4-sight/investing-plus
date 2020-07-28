@@ -1,7 +1,9 @@
 import { Context } from "../";
 import { ScriptState } from "../ScriptState";
 import { defaults } from "../../testHelpers";
-import { getBlockingStyles } from "../../styleActions/userBlocking";
+import { getBlackListStyles } from "../../styleActions/blackList";
+import { getWhiteListStyles } from "../../styleActions/whiteList";
+import { Blocking } from "../../types";
 
 describe("Context", () => {
   // Setup
@@ -48,7 +50,7 @@ describe("Context", () => {
   describe("method - initializeStyles", () => {
     it("should call appendChild, with the expected style rules", () => {
       expect.assertions(4);
-      const blockingStyleRules = getBlockingStyles(
+      const blackListStyleRules = getBlackListStyles(
         defaults.store.blackList.map((user) => user.id)
       );
 
@@ -58,12 +60,53 @@ describe("Context", () => {
 
       expect(mockDoc.body.appendChild).not.toHaveBeenCalled();
 
-      c.initializeStyles(new ScriptState(defaults.store));
+      c.initializeStyles(
+        new ScriptState({ ...defaults.store, blocking: Blocking.BLACKLIST })
+      );
 
       expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(1);
       expect(
         mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
-          blockingStyleRules
+          blackListStyleRules
+        )
+      ).toBe(true);
+    });
+  });
+
+  describe("method - batchUpdateStyles", () => {
+    it("should call appendChild with the expected style rules(3)", () => {
+      expect.assertions(4);
+      const blackListStyleRules = getBlackListStyles(
+        defaults.store.blackList.map((user) => user.id)
+      );
+      const newUser = {
+        name: "new-user",
+        id: "12345",
+      };
+      const newblackListStyleRules = `${blackListStyleRules} ${getBlackListStyles(
+        [newUser.id]
+      )}`;
+
+      const c = new Context();
+      const baseState = { ...defaults.store, blocking: Blocking.BLACKLIST };
+      const newState = { ...baseState };
+      newState.blackList.push(newUser);
+
+      c.initializeStyles(new ScriptState(baseState));
+
+      expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(1);
+      expect(
+        mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
+          blackListStyleRules
+        )
+      ).toBe(true);
+
+      c.batchUpdateStyles(newState);
+
+      expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(2);
+      expect(
+        mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
+          newblackListStyleRules
         )
       ).toBe(true);
     });
@@ -101,102 +144,165 @@ describe("Context", () => {
     });
   });
 
-  describe("method - blocking.enable", () => {
-    it("should call appendChild with the expected style rules(1)", () => {
-      expect.assertions(4);
-      const blockingStyleRules = getBlockingStyles(
+  describe("method - setBlocking", () => {
+    describe("blocking: BLACKLIST", () => {
+      it("should call appendChild with the expected style rules(1)", () => {
+        expect.assertions(6);
+        const blackListStyleRules = getBlackListStyles(
+          defaults.store.blackList.map((user) => user.id)
+        );
+        const whiteListStyleRules = getWhiteListStyles(
+          defaults.store.whiteList.map((user) => user.id)
+        );
+
+        const c = new Context();
+
+        c.initializeStyles(
+          new ScriptState({ ...defaults.store, blocking: Blocking.NONE })
+        );
+
+        expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(1);
+        expect(
+          mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
+            blackListStyleRules
+          )
+        ).toBe(false);
+        expect(
+          mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
+            whiteListStyleRules
+          )
+        ).toBe(false);
+
+        c.setBlocking(Blocking.BLACKLIST);
+
+        expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(2);
+        expect(
+          mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
+            blackListStyleRules
+          )
+        ).toBe(true);
+        expect(
+          mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
+            whiteListStyleRules
+          )
+        ).toBe(false);
+      });
+    });
+  });
+
+  describe("blocking: WHITELIST", () => {
+    it("should call appendChild with the expected style rules(2)", () => {
+      expect.assertions(6);
+      const blackListStyleRules = getBlackListStyles(
         defaults.store.blackList.map((user) => user.id)
+      );
+      const whiteListStyleRules = getWhiteListStyles(
+        defaults.store.whiteList.map((user) => user.id)
       );
 
       const c = new Context();
 
       c.initializeStyles(
-        new ScriptState({ ...defaults.store, blocking: false })
+        new ScriptState({ ...defaults.store, blocking: Blocking.NONE })
       );
 
       expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(1);
       expect(
         mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
-          blockingStyleRules
+          blackListStyleRules
+        )
+      ).toBe(false);
+      expect(
+        mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
+          whiteListStyleRules
         )
       ).toBe(false);
 
-      c.blocking.enable();
+      c.setBlocking(Blocking.WHITELIST);
 
       expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(2);
       expect(
         mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
-          blockingStyleRules
+          blackListStyleRules
+        )
+      ).toBe(false);
+      expect(
+        mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
+          whiteListStyleRules
         )
       ).toBe(true);
     });
   });
 
-  describe("method - blocking.disable", () => {
-    it("should call appendChild with the expected style rules(2)", () => {
-      expect.assertions(4);
-      const blockingStyleRules = getBlockingStyles(
-        defaults.store.blackList.map((user) => user.id)
-      );
-
-      const c = new Context();
-
-      c.initializeStyles(new ScriptState({ ...defaults.store }));
-
-      expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(1);
-      expect(
-        mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
-          blockingStyleRules
-        )
-      ).toBe(true);
-
-      c.blocking.disable();
-
-      expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(2);
-      expect(
-        mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
-          blockingStyleRules
-        )
-      ).toBe(false);
-    });
-  });
-
-  describe("method - batchUpdateStyles", () => {
+  describe("`blocking: NONE`", () => {
     it("should call appendChild with the expected style rules(3)", () => {
-      expect.assertions(4);
-      const blockingStyleRules = getBlockingStyles(
+      expect.assertions(12);
+      const blackListStyleRules = getBlackListStyles(
         defaults.store.blackList.map((user) => user.id)
       );
-      const newUser = {
-        name: "new-user",
-        id: "12345",
-      };
-      const newBlockingStyleRules = `${blockingStyleRules} ${getBlockingStyles([
-        newUser.id,
-      ])}`;
+      const whiteListStyleRules = getWhiteListStyles(
+        defaults.store.whiteList.map((user) => user.id)
+      );
 
       const c = new Context();
-      const baseState = { ...defaults.store };
-      const newState = { ...baseState };
-      newState.blackList.push(newUser);
 
-      c.initializeStyles(new ScriptState(baseState));
+      c.initializeStyles(
+        new ScriptState({ ...defaults.store, blocking: Blocking.BLACKLIST })
+      );
 
       expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(1);
       expect(
         mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
-          blockingStyleRules
+          blackListStyleRules
         )
       ).toBe(true);
+      expect(
+        mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
+          whiteListStyleRules
+        )
+      ).toBe(false);
 
-      c.batchUpdateStyles(newState);
+      c.setBlocking(Blocking.NONE);
 
       expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(2);
       expect(
         mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
-          newBlockingStyleRules
+          blackListStyleRules
+        )
+      ).toBe(false);
+      expect(
+        mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
+          whiteListStyleRules
+        )
+      ).toBe(false);
+
+      c.setBlocking(Blocking.WHITELIST);
+
+      expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(3);
+      expect(
+        mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
+          blackListStyleRules
+        )
+      ).toBe(false);
+      expect(
+        mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
+          whiteListStyleRules
         )
       ).toBe(true);
+
+      c.setBlocking(Blocking.NONE);
+
+      expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(4);
+      expect(
+        mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
+          blackListStyleRules
+        )
+      ).toBe(false);
+      expect(
+        mockDoc.body.appendChild.mock.calls[0][0].innerHTML.includes(
+          whiteListStyleRules
+        )
+      ).toBe(false);
     });
   });
 });

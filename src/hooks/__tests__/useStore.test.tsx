@@ -5,7 +5,7 @@
 import { renderHook, act } from "@testing-library/react-hooks";
 import { useStore } from "../";
 import { chrome } from "jest-chrome";
-import { EventMessage } from "../../types";
+import { EventMessage, Blocking } from "../../types";
 import { defaults } from "../../testHelpers";
 
 describe("useStore", () => {
@@ -69,11 +69,11 @@ describe("useStore", () => {
     } = renderHook(() => useStore(defaults.store));
 
     expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
-    dispatch({ blocking: false });
+    dispatch({ blocking: Blocking.WHITELIST });
     expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(2);
     expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
       type: EventMessage.STORE_SET,
-      payload: { blocking: false },
+      payload: { blocking: Blocking.WHITELIST },
     });
   });
 
@@ -82,7 +82,7 @@ describe("useStore", () => {
 
     const { result } = renderHook(() => useStore(defaults.store));
 
-    expect(result.current[0].blocking).toBe(true);
+    expect(result.current[0].blocking).toBe(Blocking.NONE);
 
     act(() => {
       chrome.runtime.onMessage.callListeners(
@@ -90,7 +90,7 @@ describe("useStore", () => {
           type: EventMessage.STORE_UPDATED,
           payload: {
             ...defaults.store,
-            blocking: false,
+            blocking: Blocking.BLACKLIST,
           },
         },
         {},
@@ -98,6 +98,6 @@ describe("useStore", () => {
       );
     });
 
-    expect(result.current[0].blocking).toBe(false);
+    expect(result.current[0].blocking).toBe(Blocking.BLACKLIST);
   });
 });

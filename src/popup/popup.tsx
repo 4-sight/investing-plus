@@ -1,12 +1,13 @@
 import React, { useEffect } from "react";
 import { useStore } from "../hooks";
 import { logger } from "../utils";
+import { Blocking } from "../types";
 
 export default function Popup() {
   const [store, dispatch] = useStore();
 
-  const toggleBlocking = () => {
-    dispatch({ blocking: !store?.blocking });
+  const switchBlocking = () => {
+    dispatch({ blocking: (store.blocking + 4) % 3 });
   };
 
   const toggleEnabled = () => {
@@ -36,21 +37,19 @@ export default function Popup() {
         Toggle Enabled
       </button>
       <button
-        className={`blocking-toggle ${
-          store?.blocking ? "enabled" : "disabled"
-        }`}
-        data-testid="blocking-toggle"
+        className="blocking-switch"
+        data-testid="blocking-switch"
         onClick={(e) => {
           e.preventDefault();
-          toggleBlocking();
+          switchBlocking();
         }}
         style={{
           cursor: "pointer",
-          backgroundColor: `${store?.blocking ? "green" : "red"}`,
-          color: `${store?.blocking ? "white" : "black"}`,
+          backgroundColor: "blue",
+          color: "white",
         }}
       >
-        Toggle Blocking
+        {`Blocking: ${Blocking[store.blocking]}`}
       </button>
     </div>
   );

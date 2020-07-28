@@ -1,9 +1,9 @@
-import { StoreState } from "../types";
+import { StoreState, Blocking } from "../types";
 
 export const defaultStore: StoreState = {
   hidden: true,
   enabled: true,
-  blocking: true,
+  blocking: Blocking.NONE,
   blackList: [],
   whiteList: [],
 };

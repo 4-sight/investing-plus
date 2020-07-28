@@ -1,13 +1,14 @@
-import { ScriptCommand, StoreState, ScriptStateChanges } from "../types";
+import {
+  ScriptCommand,
+  StoreState,
+  ScriptStateChanges,
+  Blocking,
+} from "../types";
 import { ScriptState } from "./ScriptState";
 
 export class PortHandler {
   private port: chrome.runtime.Port;
   private removePort: () => void;
-  blocking: {
-    enable: () => void;
-    disable: () => void;
-  };
 
   constructor(tab: chrome.tabs.Tab, removePort: () => void) {
     this.port = chrome.tabs.connect(tab.id);
@@ -15,10 +16,6 @@ export class PortHandler {
 
     this.port.onDisconnect.addListener(this.onDisconnect);
     this.port.onMessage.addListener(this.portListener);
-    this.blocking = {
-      enable: this.enableBlocking,
-      disable: this.disableBlocking,
-    };
   }
 
   private onDisconnect = () => {
@@ -30,15 +27,10 @@ export class PortHandler {
     //TODO port listener
   };
 
-  private enableBlocking = () => {
+  public setBlocking = (mode: Blocking) => {
     this.port.postMessage({
-      type: ScriptCommand.BLOCKING_ENABLE,
-    });
-  };
-
-  private disableBlocking = () => {
-    this.port.postMessage({
-      type: ScriptCommand.BLOCKING_DISABLE,
+      type: ScriptCommand.BLOCKING_SET,
+      payload: mode,
     });
   };
 

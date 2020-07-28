@@ -8,6 +8,7 @@ import { render, fireEvent } from "@testing-library/react";
 import { mockError, getProperties } from "../../testHelpers";
 import { useStore } from "../../hooks";
 import { defaults } from "../../testHelpers";
+import { Blocking } from "../../types";
 
 jest.mock("../../hooks/useStore");
 const mockUseStore = useStore as jest.Mock;
@@ -40,41 +41,44 @@ describe("Popup", () => {
     expect.assertions(6);
     const popup1 = render(<Popup {...defaultProps} />);
 
-    let blockingButton1 = popup1.getByTestId("blocking-toggle");
+    let blockingButton1 = popup1.getByTestId("blocking-switch");
 
     expect(blockingButton1).toBeInstanceOf(HTMLButtonElement);
-    expect(
-      getProperties(blockingButton1).pendingProps.className.includes("enabled")
-    ).toBe(true);
-    expect(
-      getProperties(blockingButton1).pendingProps.className.includes("disabled")
-    ).toBe(false);
+    expect(blockingButton1.textContent).toEqual("Blocking: NONE");
 
     popup1.unmount();
 
     mockUseStore.mockReturnValueOnce([
-      { ...defaults.store, blocking: false },
+      { ...defaults.store, blocking: Blocking.BLACKLIST },
       mockDispatch,
     ]);
     const popup2 = render(<Popup {...defaultProps} />);
 
-    let blockingButton2 = popup2.getByTestId("blocking-toggle");
+    let blockingButton2 = popup2.getByTestId("blocking-switch");
 
     expect(blockingButton2).toBeInstanceOf(HTMLButtonElement);
-    expect(
-      getProperties(blockingButton2).pendingProps.className.includes("enabled")
-    ).toBe(false);
-    expect(
-      getProperties(blockingButton2).pendingProps.className.includes("disabled")
-    ).toBe(true);
+    expect(blockingButton2.textContent).toEqual("Blocking: BLACKLIST");
+
+    popup2.unmount();
+
+    mockUseStore.mockReturnValueOnce([
+      { ...defaults.store, blocking: Blocking.WHITELIST },
+      mockDispatch,
+    ]);
+    render(<Popup {...defaultProps} />);
+
+    let blockingButton3 = popup2.getByTestId("blocking-switch");
+
+    expect(blockingButton3).toBeInstanceOf(HTMLButtonElement);
+    expect(blockingButton3.textContent).toEqual("Blocking: WHITELIST");
   });
 
-  it("should display a button that toggles blocking", async () => {
+  it("should display a button that switches blocking", async () => {
     expect.assertions(3);
 
     const { getByTestId } = render(<Popup {...defaultProps} />);
 
-    let blockingButton = getByTestId("blocking-toggle");
+    let blockingButton = getByTestId("blocking-switch");
 
     expect(mockDispatch).not.toHaveBeenCalled();
 
@@ -83,7 +87,7 @@ describe("Popup", () => {
 
     expect(mockDispatch).toHaveBeenCalledTimes(1);
     expect(mockDispatch).toHaveBeenCalledWith({
-      blocking: !defaults.store.blocking,
+      blocking: (defaults.store.blocking + 4) % 3,
     });
   });
 });

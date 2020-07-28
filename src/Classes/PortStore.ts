@@ -27,11 +27,7 @@ export class PortStore {
 
         switch (change) {
           case "blocking":
-            if (changes.blocking) {
-              port.blocking.enable();
-            } else {
-              port.blocking.disable();
-            }
+            port.setBlocking(changes.blocking);
             break;
 
           case "enabled":

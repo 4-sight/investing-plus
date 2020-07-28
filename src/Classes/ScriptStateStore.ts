@@ -7,7 +7,7 @@ export class ScriptStateStore {
     this.state = { ...state };
   }
 
-  set(key: keyof ScriptState, val: any) {
+  set(key, val) {
     this.state[key] = val;
   }
 

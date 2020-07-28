@@ -1,5 +1,5 @@
 import { Store } from "../Store";
-import { EventMessage, StoreState } from "../../types";
+import { EventMessage, StoreState, Blocking } from "../../types";
 import { chrome } from "jest-chrome";
 import { defaults } from "../../testHelpers";
 
@@ -33,7 +33,7 @@ describe("Store", () => {
     const newState: StoreState = {
       ...defaults.store,
       enabled: false,
-      blocking: false,
+      blocking: Blocking.BLACKLIST,
     };
 
     let store = new Store(defaults.store, () => {});
@@ -91,7 +91,7 @@ describe("Store", () => {
     const syncStore: StoreState = {
       ...defaults.store,
       enabled: false,
-      blocking: false,
+      blocking: Blocking.WHITELIST,
     };
 
     chrome.storage.sync.get.mockImplementationOnce((key, cb) => {
@@ -122,7 +122,7 @@ describe("Store", () => {
     const syncStore: StoreState = {
       ...defaults.store,
       enabled: false,
-      blocking: false,
+      blocking: Blocking.BLACKLIST,
     };
 
     expect(chrome.storage.onChanged.hasListeners()).toBe(false);
@@ -203,7 +203,7 @@ describe("Store", () => {
     const newState: StoreState = {
       ...defaults.store,
       enabled: false,
-      blocking: false,
+      blocking: Blocking.BLACKLIST,
     };
     const store = new Store(defaults.store, () => {});
     expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
@@ -272,9 +272,9 @@ describe("Store", () => {
 
     expect(store.getChanges()).toEqual([{ enabled: false }, 1]);
 
-    store.set({ blocking: false });
+    store.set({ blocking: Blocking.WHITELIST });
 
-    expect(store.getChanges()).toEqual([{ blocking: false }, 1]);
+    expect(store.getChanges()).toEqual([{ blocking: Blocking.WHITELIST }, 1]);
 
     const newState = {
       ...defaults.store,
