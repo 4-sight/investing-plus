@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/4-sight/investing-plus#readme",
   "dependencies": {
+    "deep-equal": "^2.0.3",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   },
