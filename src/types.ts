@@ -29,6 +29,7 @@ export type StoreState = {
   blocking: boolean;
   blackList: User[];
   whiteList: User[];
+  hidden: boolean;
 };
 
 export type StoreDispatch = (payload: Partial<StoreState>) => void;

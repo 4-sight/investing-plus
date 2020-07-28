@@ -11,23 +11,27 @@ describe("getScriptChanges", () => {
     const storeChanges1 = { blocking: true };
     expect(getScriptChanges(storeChanges1)).toEqual([storeChanges1, 1]);
 
-    const storeChanges2 = { enabled: true };
+    const storeChanges2 = { hidden: true };
     expect(getScriptChanges(storeChanges2)[0]).not.toEqual(storeChanges2);
     expect(getScriptChanges(storeChanges2)).toEqual([{}, 0]);
 
-    const storeChanges3 = { blocking: true, enabled: false };
+    const storeChanges3 = { blocking: true, enabled: false, hidden: true };
     expect(getScriptChanges(storeChanges3)[0]).not.toEqual(storeChanges3);
-    expect(getScriptChanges(storeChanges3)).toEqual([{ blocking: true }, 1]);
+    expect(getScriptChanges(storeChanges3)).toEqual([
+      { blocking: true, enabled: false },
+      2,
+    ]);
 
     const storeChanges4 = { ...defaults.store };
     expect(getScriptChanges(storeChanges4)[0]).not.toEqual(storeChanges4);
     expect(getScriptChanges(storeChanges4)).toEqual([
       {
+        enabled: defaults.store.enabled,
         blocking: defaults.store.blocking,
         blackList: defaults.store.blackList,
         whiteList: defaults.store.whiteList,
       },
-      3,
+      4,
     ]);
   });
 });

@@ -117,7 +117,7 @@ describe("EventHandler", () => {
       expect.assertions(3);
       expect(MockPortStore.updatePorts).not.toHaveBeenCalled();
 
-      const storeUpdate = { enabled: true, blocking: false };
+      const storeUpdate = { enabled: true, blocking: false, hidden: true };
       new EventHandler(defaults.store, (MockPortStore as unknown) as PortStore);
       chrome.runtime.onMessage.callListeners(
         {
@@ -139,8 +139,8 @@ describe("EventHandler", () => {
 
       expect(MockPortStore.updatePorts).toHaveBeenCalledTimes(1);
       expect(MockPortStore.updatePorts).toHaveBeenCalledWith([
-        { blocking: false },
-        1,
+        { blocking: false, enabled: true },
+        2,
       ]);
     });
   });

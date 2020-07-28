@@ -3,7 +3,7 @@ import { StoreState, ScriptStateChanges } from "../types";
 export const getScriptChanges = (
   storeChanges: Partial<StoreState>
 ): [ScriptStateChanges, number] => {
-  const filterList = ["enabled"];
+  const filterList = ["hidden"];
 
   const scriptChanges = { ...storeChanges };
 
