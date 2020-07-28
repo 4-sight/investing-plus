@@ -33,7 +33,9 @@ export class Context {
   };
 
   private addStylesToDocument = () => {
-    document.body.appendChild(this.sheet);
+    if (this.store.get("enabled")) {
+      document.body.appendChild(this.sheet);
+    }
   };
 
   private removeStylesFromDocument = () => {
@@ -60,10 +62,12 @@ export class Context {
   // Public Methods =======================================
 
   enable = () => {
+    this.store.set("enabled", true);
     this.addStylesToDocument();
   };
 
   disable = () => {
+    this.store.set("enabled", false);
     this.removeStylesFromDocument();
   };
 
