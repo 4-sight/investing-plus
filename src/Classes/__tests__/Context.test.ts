@@ -74,6 +74,9 @@ describe("Context", () => {
       expect.assertions(2);
 
       const c = new Context();
+      c.initializeStyles(
+        new ScriptState({ ...defaults.store, enabled: false })
+      );
 
       expect(mockDoc.body.appendChild).not.toHaveBeenCalled();
 
@@ -88,6 +91,7 @@ describe("Context", () => {
       expect.assertions(2);
 
       const c = new Context();
+      c.initializeStyles(new ScriptState(defaults.store));
 
       expect(mockDoc.body.removeChild).not.toHaveBeenCalled();
 
