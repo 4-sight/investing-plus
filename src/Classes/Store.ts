@@ -1,6 +1,7 @@
 import { EventMessage, Message, StoreState } from "../types";
 import { ScriptState } from "./ScriptState";
 import { getScriptChanges } from "../utils";
+import deepEqual from "deep-equal";
 
 export class Store {
   private storeState: StoreState;
@@ -69,14 +70,20 @@ export class Store {
     this.portUpdate(scriptChanges);
   }
 
+  private isEqualTo = (newStore: StoreState): boolean => {
+    return deepEqual(this.storeState, newStore);
+  };
+
   private updateSyncStore() {
     chrome.storage.sync.set({ store: { ...this.storeState } });
   }
 
   private syncListener = (changes) => {
     if ("store" in changes) {
-      this.storeState = { ...changes.store.newValue };
-      this.publish();
+      if (!this.isEqualTo(changes.store.newValue)) {
+        this.storeState = { ...changes.store.newValue };
+        this.publish();
+      }
     }
   };
 
