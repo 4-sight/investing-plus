@@ -77,44 +77,6 @@ describe("PortStore", () => {
     });
   });
 
-  describe("Method - enablePorts", () => {
-    it("should call portHandler.enable for each port", () => {
-      expect.assertions(2);
-
-      const mockPortMap: Ports = new Map();
-      const portStore = new PortStore(mockPortMap);
-
-      expect(mockPortHandler.enable).not.toHaveBeenCalled();
-
-      portStore.addPort(12345, (mockPortHandler as unknown) as PortHandler);
-      portStore.addPort(23456, (mockPortHandler as unknown) as PortHandler);
-      portStore.addPort(34567, (mockPortHandler as unknown) as PortHandler);
-
-      portStore.enablePorts();
-
-      expect(mockPortHandler.enable).toHaveBeenCalledTimes(3);
-    });
-  });
-
-  describe("Method - disablePorts", () => {
-    it("should call portHandler.disable for each port", () => {
-      expect.assertions(2);
-
-      const mockPortMap: Ports = new Map();
-      const portStore = new PortStore(mockPortMap);
-
-      expect(mockPortHandler.enable).not.toHaveBeenCalled();
-
-      portStore.addPort(12345, (mockPortHandler as unknown) as PortHandler);
-      portStore.addPort(23456, (mockPortHandler as unknown) as PortHandler);
-      portStore.addPort(34567, (mockPortHandler as unknown) as PortHandler);
-
-      portStore.disablePorts();
-
-      expect(mockPortHandler.disable).toHaveBeenCalledTimes(3);
-    });
-  });
-
   describe("Method - handlePortUpdate", () => {
     it("should call batchUpdate for more than one change", () => {
       expect.assertions(2);
@@ -132,6 +94,42 @@ describe("PortStore", () => {
       portStore.updatePorts([new ScriptState(defaults.store), 4]);
 
       expect(mockPort.batchUpdate).toHaveBeenCalledTimes(3);
+    });
+
+    it("should call enable if change == { enabled: true }", () => {
+      expect.assertions(2);
+
+      const mockPortMap: Ports = new Map();
+      const portStore = new PortStore(mockPortMap);
+
+      portStore.addPort(12345, (mockPortHandler as unknown) as PortHandler);
+      portStore.addPort(23456, (mockPortHandler as unknown) as PortHandler);
+      portStore.addPort(34567, (mockPortHandler as unknown) as PortHandler);
+      const mockPort = mockPortMap.get(12345);
+
+      expect(mockPort.enable).not.toHaveBeenCalled();
+
+      portStore.updatePorts([{ enabled: true }, 1]);
+
+      expect(mockPort.enable).toHaveBeenCalledTimes(3);
+    });
+
+    it("should call disable if change == { enabled: false }", () => {
+      expect.assertions(2);
+
+      const mockPortMap: Ports = new Map();
+      const portStore = new PortStore(mockPortMap);
+
+      portStore.addPort(12345, (mockPortHandler as unknown) as PortHandler);
+      portStore.addPort(23456, (mockPortHandler as unknown) as PortHandler);
+      portStore.addPort(34567, (mockPortHandler as unknown) as PortHandler);
+      const mockPort = mockPortMap.get(12345);
+
+      expect(mockPort.disable).not.toHaveBeenCalled();
+
+      portStore.updatePorts([{ enabled: false }, 1]);
+
+      expect(mockPort.disable).toHaveBeenCalledTimes(3);
     });
 
     it("should call blocking enable if change == { blocking: true }", () => {

@@ -16,18 +16,6 @@ export class PortStore {
     this.ports.delete(id);
   };
 
-  enablePorts = () => {
-    this.ports.forEach((port) => {
-      port.enable();
-    });
-  };
-
-  disablePorts = () => {
-    this.ports.forEach((port) => {
-      port.disable();
-    });
-  };
-
   updatePorts = ([changes, n]: [ScriptStateChanges, number]) => {
     if (n > 1) {
       this.ports.forEach((port) => {
@@ -44,6 +32,15 @@ export class PortStore {
             } else {
               port.blocking.disable();
             }
+            break;
+
+          case "enabled":
+            if (changes.enabled) {
+              port.enable();
+            } else {
+              port.disable();
+            }
+            break;
         }
       });
     }
