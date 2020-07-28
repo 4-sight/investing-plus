@@ -1,16 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { StoreState, StoreDispatch, EventMessage } from "../types";
 import { isMessage } from "../utils";
+import { defaultStore } from "../constants";
 
 type Listener = (req: any) => boolean;
 type SetStore = React.Dispatch<React.SetStateAction<StoreState>>;
-
-const defaultStore: StoreState = {
-  blocking: true,
-  enabled: true,
-  blackList: [],
-  whiteList: [],
-};
 
 const connect = (setStore: SetStore, listener: Listener) => {
   chrome.runtime.sendMessage(
