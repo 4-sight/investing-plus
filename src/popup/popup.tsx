@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useStore } from "../hooks";
+import { logger } from "../utils";
 
 export default function Popup() {
   const [store, dispatch] = useStore();
@@ -12,8 +13,14 @@ export default function Popup() {
     dispatch({ enabled: !store?.enabled });
   };
 
+  useEffect(() => {
+    return logger("POPUP");
+  }, []);
+
   return (
-    <div className={`popupContainer ${store?.enabled ? "enabled" : "disabled"}`}>
+    <div
+      className={`popupContainer ${store?.enabled ? "enabled" : "disabled"}`}
+    >
       Hello, world!
       <button
         onClick={(e) => {
@@ -29,7 +36,9 @@ export default function Popup() {
         Toggle Enabled
       </button>
       <button
-        className={`blocking-toggle ${store?.blocking ? "enabled" : "disabled"}`}
+        className={`blocking-toggle ${
+          store?.blocking ? "enabled" : "disabled"
+        }`}
         data-testid="blocking-toggle"
         onClick={(e) => {
           e.preventDefault();
