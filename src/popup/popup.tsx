@@ -4,15 +4,7 @@ import { logger } from "../utils";
 import { Blocking } from "../types";
 
 export default function Popup() {
-  const [store, dispatch] = useStore();
-
-  const switchBlocking = () => {
-    dispatch({ blocking: (store.blocking + 4) % 3 });
-  };
-
-  const toggleEnabled = () => {
-    dispatch({ enabled: !store?.enabled });
-  };
+  const store = useStore();
 
   useEffect(() => {
     return logger("POPUP");
@@ -20,18 +12,21 @@ export default function Popup() {
 
   return (
     <div
-      className={`popupContainer ${store?.enabled ? "enabled" : "disabled"}`}
+      className={`popupContainer ${
+        store.get("enabled") ? "enabled" : "disabled"
+      }`}
     >
       Hello, world!
       <button
+        data-testid="toggle-enabled"
         onClick={(e) => {
           e.preventDefault();
-          toggleEnabled();
+          store.toggleEnabled();
         }}
         style={{
           cursor: "pointer",
-          backgroundColor: `${store?.enabled ? "green" : "red"}`,
-          color: `${store?.enabled ? "white" : "black"}`,
+          backgroundColor: `${store.get("enabled") ? "green" : "red"}`,
+          color: `${store.get("enabled") ? "white" : "black"}`,
         }}
       >
         Toggle Enabled
@@ -41,7 +36,7 @@ export default function Popup() {
         data-testid="blocking-switch"
         onClick={(e) => {
           e.preventDefault();
-          switchBlocking();
+          store.switchBlocking();
         }}
         style={{
           cursor: "pointer",
@@ -49,7 +44,7 @@ export default function Popup() {
           color: "white",
         }}
       >
-        {`Blocking: ${Blocking[store.blocking]}`}
+        {`Blocking: ${Blocking[store.get("blocking")]}`}
       </button>
     </div>
   );

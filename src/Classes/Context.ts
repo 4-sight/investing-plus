@@ -1,4 +1,4 @@
-import { StyleMap, User, Blocking } from "../types";
+import { StyleMap, Blocking } from "../types";
 import { ScriptStateStore } from "./ScriptStateStore";
 import { ScriptState } from "./ScriptState";
 import { blackList, whiteList } from "../styleActions";
@@ -40,9 +40,7 @@ export class Context {
   };
 
   private addBlackList = () => {
-    const blackListIds = this.store
-      .get("blackList")
-      ?.map((user: User) => user.id);
+    const blackListIds = this.store.get("blackList").listIds();
 
     blackListIds && blackList.enable(this.styles, blackListIds);
   };
@@ -52,9 +50,7 @@ export class Context {
   };
 
   private addWhiteList = () => {
-    const whiteListIds = this.store
-      .get("whiteList")
-      ?.map((user: User) => user.id);
+    const whiteListIds = this.store.get("whiteList").listIds();
 
     whiteListIds && whiteList.enable(this.styles, whiteListIds);
   };

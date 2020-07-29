@@ -1,4 +1,4 @@
-import { PortHandler, ScriptState } from "./Classes";
+import { PortHandler, ScriptState, UserStore } from "./Classes";
 
 export enum Blocking {
   "BLACKLIST",
@@ -33,12 +33,26 @@ export type User = {
 export type StoreState = {
   enabled: boolean;
   blocking: Blocking;
-  blackList: User[];
-  whiteList: User[];
+  blackList: UserStore;
+  whiteList: UserStore;
   hidden: boolean;
 };
 
 export type StoreDispatch = (payload: Partial<StoreState>) => void;
+
+export type UseStore = {
+  get: (key: keyof StoreState) => any;
+  toggleEnabled: () => void;
+  switchBlocking: () => void;
+  blackList: () => User[];
+  blackListAddUser: (user: User) => void;
+  blackListRemoveUser: (userId: string) => void;
+  blackListUpdateUser: (userId: string, update: Partial<User>) => void;
+  whiteList: () => User[];
+  whiteListAddUser: (user: User) => void;
+  whiteListRemoveUser: (userId: string) => void;
+  whiteListUpdateUser: (userId: string, update: Partial<User>) => void;
+};
 
 export enum ScriptCommand {
   "INITIALIZE",

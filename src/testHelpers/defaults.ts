@@ -1,8 +1,10 @@
 import { defaultStore } from "../constants";
+import { StoreState } from "../types";
+import { UserStore } from "../Classes";
 
-export const store = {
+export const store: StoreState = {
   ...defaultStore,
-  blackList: [
+  blackList: new UserStore([
     {
       name: "test-user-1",
       id: "1234",
@@ -15,8 +17,8 @@ export const store = {
       name: "test-user-3",
       id: "3456",
     },
-  ],
-  whiteList: [
+  ]),
+  whiteList: new UserStore([
     {
       name: "test-user-4",
       id: "4567",
@@ -29,5 +31,5 @@ export const store = {
       name: "test-user-6",
       id: "6789",
     },
-  ],
+  ]),
 };

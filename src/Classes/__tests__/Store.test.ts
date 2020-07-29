@@ -2,6 +2,7 @@ import { Store } from "../Store";
 import { EventMessage, StoreState, Blocking } from "../../types";
 import { chrome } from "jest-chrome";
 import { defaults } from "../../testHelpers";
+import { UserStore } from "../UserStore";
 
 describe("Store", () => {
   // Setup
@@ -278,7 +279,7 @@ describe("Store", () => {
 
     const newState = {
       ...defaults.store,
-      blackList: [{ name: "new-test-user", id: "80979" }],
+      blackList: new UserStore([{ name: "new-test-user", id: "80979" }]),
     };
 
     store.setStore(newState);

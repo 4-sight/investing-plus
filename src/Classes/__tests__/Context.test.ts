@@ -51,7 +51,7 @@ describe("Context", () => {
     it("should call appendChild, with the expected style rules", () => {
       expect.assertions(4);
       const blackListStyleRules = getBlackListStyles(
-        defaults.store.blackList.map((user) => user.id)
+        defaults.store.blackList.listIds()
       );
 
       expect(mockDoc.body.appendChild).not.toHaveBeenCalled();
@@ -74,10 +74,10 @@ describe("Context", () => {
   });
 
   describe("method - batchUpdateStyles", () => {
-    it("should call appendChild with the expected style rules(3)", () => {
+    it("should call appendChild with the expected style rules(1)", () => {
       expect.assertions(4);
       const blackListStyleRules = getBlackListStyles(
-        defaults.store.blackList.map((user) => user.id)
+        defaults.store.blackList.listIds()
       );
       const newUser = {
         name: "new-user",
@@ -90,7 +90,7 @@ describe("Context", () => {
       const c = new Context();
       const baseState = { ...defaults.store, blocking: Blocking.BLACKLIST };
       const newState = { ...baseState };
-      newState.blackList.push(newUser);
+      newState.blackList.add(newUser);
 
       c.initializeStyles(new ScriptState(baseState));
 
@@ -146,13 +146,13 @@ describe("Context", () => {
 
   describe("method - setBlocking", () => {
     describe("blocking: BLACKLIST", () => {
-      it("should call appendChild with the expected style rules(1)", () => {
+      it("should call appendChild with the expected style rules(2)", () => {
         expect.assertions(6);
         const blackListStyleRules = getBlackListStyles(
-          defaults.store.blackList.map((user) => user.id)
+          defaults.store.blackList.listIds()
         );
         const whiteListStyleRules = getWhiteListStyles(
-          defaults.store.whiteList.map((user) => user.id)
+          defaults.store.whiteList.listIds()
         );
 
         const c = new Context();
@@ -191,13 +191,13 @@ describe("Context", () => {
   });
 
   describe("blocking: WHITELIST", () => {
-    it("should call appendChild with the expected style rules(2)", () => {
+    it("should call appendChild with the expected style rules(3)", () => {
       expect.assertions(6);
       const blackListStyleRules = getBlackListStyles(
-        defaults.store.blackList.map((user) => user.id)
+        defaults.store.blackList.listIds()
       );
       const whiteListStyleRules = getWhiteListStyles(
-        defaults.store.whiteList.map((user) => user.id)
+        defaults.store.whiteList.listIds()
       );
 
       const c = new Context();
@@ -235,13 +235,13 @@ describe("Context", () => {
   });
 
   describe("`blocking: NONE`", () => {
-    it("should call appendChild with the expected style rules(3)", () => {
+    it("should call appendChild with the expected style rules(4)", () => {
       expect.assertions(12);
       const blackListStyleRules = getBlackListStyles(
-        defaults.store.blackList.map((user) => user.id)
+        defaults.store.blackList.listIds()
       );
       const whiteListStyleRules = getWhiteListStyles(
-        defaults.store.whiteList.map((user) => user.id)
+        defaults.store.whiteList.listIds()
       );
 
       const c = new Context();
