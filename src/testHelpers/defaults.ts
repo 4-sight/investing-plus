@@ -3,7 +3,7 @@ import { StoreState } from "../types";
 import { UserStore } from "../Classes";
 
 export const store: StoreState = {
-  ...defaultStore,
+  ...defaultStore(),
   blackList: new UserStore([
     {
       name: "test-user-1",

@@ -41,5 +41,5 @@ export class EventHandler {
   };
 }
 
-new EventHandler(defaultStore);
+new EventHandler(defaultStore());
 logger("EVENT PAGE");
