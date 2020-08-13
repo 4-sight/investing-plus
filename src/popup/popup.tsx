@@ -1,42 +1,34 @@
-import React, { useEffect } from "react";
-import { useStore } from "../hooks";
-import { logger } from "../utils";
+import React from "react";
+import useGenStore from "./hooks/useGenStore";
 import { Blocking } from "../types";
 
 export default function Popup() {
-  const store = useStore();
-
-  useEffect(() => {
-    return logger("POPUP");
-  }, []);
-
+  const [
+    { enabled, blocking },
+    { toggleEnabled, switchBlocking },
+  ] = useGenStore();
   return (
-    <div
-      className={`popupContainer ${
-        store.get("enabled") ? "enabled" : "disabled"
-      }`}
-    >
-      Hello, world!
+    <div className={`popupContainer ${enabled ? "enabled" : "disabled"}`}>
+      IV+
       <button
         data-testid="toggle-enabled"
         onClick={(e) => {
           e.preventDefault();
-          store.toggleEnabled();
+          toggleEnabled();
         }}
         style={{
           cursor: "pointer",
-          backgroundColor: `${store.get("enabled") ? "green" : "red"}`,
-          color: `${store.get("enabled") ? "white" : "black"}`,
+          backgroundColor: `${enabled ? "green" : "red"}`,
+          color: `${enabled ? "white" : "black"}`,
         }}
       >
-        Toggle Enabled
+        {enabled ? "Disable" : "Enable"}
       </button>
       <button
-        className="blocking-switch"
-        data-testid="blocking-switch"
+        data-testid="switch-blocking"
         onClick={(e) => {
           e.preventDefault();
-          store.switchBlocking();
+          switchBlocking();
         }}
         style={{
           cursor: "pointer",
@@ -44,7 +36,7 @@ export default function Popup() {
           color: "white",
         }}
       >
-        {`Blocking: ${Blocking[store.get("blocking")]}`}
+        {`Blocking: ${Blocking[blocking]}`}
       </button>
     </div>
   );

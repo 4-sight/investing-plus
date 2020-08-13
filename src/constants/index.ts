@@ -1,1 +1,1 @@
-export * from "./defaultStore";
+export * as defaultStores from "./defaultStores";

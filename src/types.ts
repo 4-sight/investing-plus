@@ -1,4 +1,4 @@
-import { PortHandler, ScriptState, UserStore } from "./Classes";
+import { PortHandler } from "./eventPage/Classes";
 
 export enum Blocking {
   "BLACKLIST",
@@ -7,12 +7,13 @@ export enum Blocking {
 }
 
 export enum EventMessage {
-  "STORE_GET_STORE",
-  "STORE_OVERRIDE",
-  "STORE_GET",
-  "STORE_SET",
-  "STORE_UPDATED",
   "CONTENT_SCRIPT_MOUNTED",
+  "POPUP_MOUNTED",
+  "GEN_STORE_UPDATED",
+  "BLACKLIST_UPDATED",
+  "WHITELIST_UPDATED",
+  "TOGGLE_ENABLED",
+  "SWITCH_BLOCKING",
 }
 
 export type Message = {
@@ -30,40 +31,25 @@ export type User = {
   name: string;
 };
 
-export type StoreState = {
+export type Users = User[];
+export type UserIds = string[];
+
+export type UserMap = Map<string, User>;
+
+export type GeneralStoreState = {
   enabled: boolean;
   blocking: Blocking;
-  blackList: UserStore;
-  whiteList: UserStore;
-  hidden: boolean;
 };
 
-export type StoreDispatch = (payload: Partial<StoreState>) => void;
-
-export type UseStore = {
-  get: (key: keyof StoreState) => any;
-  toggleEnabled: () => void;
-  switchBlocking: () => void;
-  blackList: () => User[];
-  blackListAddUser: (user: User) => void;
-  blackListRemoveUser: (userId: string) => void;
-  blackListUpdateUser: (userId: string, update: Partial<User>) => void;
-  whiteList: () => User[];
-  whiteListAddUser: (user: User) => void;
-  whiteListRemoveUser: (userId: string) => void;
-  whiteListUpdateUser: (userId: string, update: Partial<User>) => void;
-};
+// export type StoreDispatch = (payload: Partial<StoreState>) => void;
 
 export enum ScriptCommand {
   "INITIALIZE",
   "ENABLE",
   "DISABLE",
-  "UPDATE_BATCH",
-  "BLOCKING_SET",
+  "NEW_STYLE_RULES",
 }
-
-export type ScriptStateChanges = Partial<ScriptState>;
 
 export type StyleMap = Map<string, string>;
 
-export type Ports = Map<number, PortHandler>;
+export type PortMap = Map<number, PortHandler>;

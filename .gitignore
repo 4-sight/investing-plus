@@ -2,3 +2,5 @@ dist/js
 node_modules
 coverage
 .vscode/
+zz_flow.txt
+

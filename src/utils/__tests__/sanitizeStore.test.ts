@@ -1,88 +1,69 @@
-import { sanitizeStore } from "../";
-import { defaultStore } from "../../constants";
-import { StoreState, Blocking } from "../../types";
-import { UserStore } from "../../Classes";
+import { getSanitizer } from "../";
+import { defaults } from "../../testHelpers";
+import { GeneralStoreState } from "../../types";
 
-describe("sanitizeStore", () => {
-  it("should return a StoreState", () => {
-    expect.assertions(9);
+describe("getSanitizer", () => {
+  it("should take a default store and return a function", () => {
+    expect.assertions(1);
 
-    const defaultKeys = Object.keys(defaultStore());
+    const sanitizer = getSanitizer<GeneralStoreState>(() => ({
+      ...defaults.generalStore,
+    }));
 
-    expect(Object.keys(sanitizeStore(undefined))).toEqual(defaultKeys);
-    expect(Object.keys(sanitizeStore(""))).toEqual(defaultKeys);
-    expect(Object.keys(sanitizeStore("store"))).toEqual(defaultKeys);
-    expect(Object.keys(sanitizeStore(1))).toEqual(defaultKeys);
-    expect(Object.keys(sanitizeStore([{}, 2, ""]))).toEqual(defaultKeys);
-    expect(Object.keys(sanitizeStore([]))).toEqual(defaultKeys);
-    expect(Object.keys(sanitizeStore({}))).toEqual(defaultKeys);
-    expect(Object.keys(sanitizeStore(defaultStore))).toEqual(defaultKeys);
+    expect(typeof sanitizer).toEqual("function");
+  });
+});
+
+describe("sanitizer", () => {
+  const genSanitizer = getSanitizer<GeneralStoreState>(() => ({
+    ...defaults.generalStore,
+  }));
+
+  const matchingValues = (store, baseLine): boolean => {
+    let matching = true;
+    Object.entries(store).forEach(([key, val]) => {
+      if (typeof val !== typeof baseLine[key]) {
+        matching = false;
+      }
+    });
+
+    return matching;
+  };
+
+  it("should always return a valid store", () => {
+    expect.assertions(10);
+
+    // Has expected keys
+    expect(Object.keys(genSanitizer({}))).toEqual(
+      Object.keys(defaults.generalStore)
+    );
+    expect(Object.keys(genSanitizer(defaults.generalStore))).toEqual(
+      Object.keys(defaults.generalStore)
+    );
+    expect(Object.keys(genSanitizer(""))).toEqual(
+      Object.keys(defaults.generalStore)
+    );
+    expect(Object.keys(genSanitizer(undefined))).toEqual(
+      Object.keys(defaults.generalStore)
+    );
+    expect(Object.keys(genSanitizer(false))).toEqual(
+      Object.keys(defaults.generalStore)
+    );
+    expect(Object.keys(genSanitizer(true))).toEqual(
+      Object.keys(defaults.generalStore)
+    );
+    expect(Object.keys(genSanitizer([{}, {}]))).toEqual(
+      Object.keys(defaults.generalStore)
+    );
     expect(
-      Object.keys(sanitizeStore({ ...defaultStore, testField: "test" }))
-    ).toEqual(defaultKeys);
-  });
+      Object.keys(genSanitizer({ ...defaults.generalStore, enabled: false }))
+    ).toEqual(Object.keys(defaults.generalStore));
 
-  it("should return storeState with the given fields", () => {
-    expect.assertions(4);
-
-    const store1: StoreState = {
-      ...defaultStore(),
-      enabled: true,
-      blocking: Blocking.WHITELIST,
-    };
-
-    const store2: StoreState = {
-      ...defaultStore(),
-      enabled: false,
-      blocking: Blocking.BLACKLIST,
-    };
-
-    const sanitized1 = sanitizeStore(store1);
-
-    expect(sanitized1.enabled).toEqual(store1.enabled);
-    expect(sanitized1.blocking).toEqual(store1.blocking);
-
-    const sanitized2 = sanitizeStore(store2);
-
-    expect(sanitized2.enabled).toEqual(store2.enabled);
-    expect(sanitized2.blocking).toEqual(store2.blocking);
-  });
-
-  it("should not return invalid fields", () => {
-    expect.assertions(4);
-
-    const invalidStore = {
-      ...defaultStore(),
-      enabled: true,
-      blocking: Blocking.WHITELIST,
-      invalidField1: "test",
-      invalidField2: { test: 2 },
-    };
-
-    const sanitized = sanitizeStore(invalidStore);
-
-    expect(sanitized.enabled).toEqual(invalidStore.enabled);
-    expect(sanitized.blocking).toEqual(invalidStore.blocking);
-    expect(sanitized).not.toHaveProperty("invalidField1");
-    expect(sanitized).not.toHaveProperty("invalidField2");
-  });
-
-  it("should not return invalid values", () => {
-    expect.assertions(4);
-
-    const invalidStore = {
-      ...defaultStore(),
-      enabled: undefined,
-      blocking: "0",
-      blackList: [{ id: "123", name: "test-user" }],
-      whiteList: new UserStore([{ id: "123", name: "test-user" }]),
-    };
-
-    const sanitized = sanitizeStore(invalidStore);
-
-    expect(sanitized.enabled).not.toEqual(invalidStore.enabled);
-    expect(sanitized.blocking).not.toEqual(invalidStore.blocking);
-    expect(sanitized.blackList).not.toEqual(invalidStore.blackList);
-    expect(sanitized.whiteList).toEqual(invalidStore.whiteList);
+    // Values are of the expected type
+    const dirtyGenStore = { blocking: "1", enabled: false };
+    expect(matchingValues(dirtyGenStore, defaults.generalStore)).toBe(false);
+    expect(
+      matchingValues(genSanitizer(dirtyGenStore), defaults.generalStore)
+    ).toBe(true);
   });
 });

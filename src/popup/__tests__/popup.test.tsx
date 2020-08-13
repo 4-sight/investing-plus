@@ -3,134 +3,157 @@
  */
 
 import React from "react";
-import Popup from "../popup";
 import { render, fireEvent } from "@testing-library/react";
-import { mockError, getProperties } from "../../testHelpers";
-import { useStore } from "../../hooks";
-import { defaults } from "../../testHelpers";
-import { Blocking, UseStore, StoreState } from "../../types";
+import { chrome } from "jest-chrome";
+import Popup from "../Popup";
+import useGenStore from "../hooks/useGenStore";
+import { mockError, getProperties, defaults } from "../../testHelpers";
+import { Blocking } from "../../types";
 
-jest.mock("../../hooks/useStore");
-const mockUseStore = useStore as jest.Mock;
-let store;
+jest.mock("../hooks/useGenStore");
+
+const mockUseGenStore = (useGenStore as unknown) as jest.Mock;
 
 describe("Popup", () => {
   // Setup
-  const defaultProps = {};
+  let actions;
 
   beforeEach(() => {
-    store = {
-      get: jest.fn((key: keyof StoreState) => defaults.store[key]),
+    actions = {
       toggleEnabled: jest.fn(),
       switchBlocking: jest.fn(),
     };
 
-    mockUseStore.mockReturnValue(store);
+    mockUseGenStore.mockClear();
+    chrome.runtime.sendMessage.mockClear();
+
+    mockUseGenStore.mockReturnValue([defaults.generalStore, actions]);
   });
 
-  //==========================================
+  //========================================
 
   it("should render without crashing or calling console.error", () => {
     expect.assertions(2);
+
     mockError.mock();
-    expect(console.error).not.toHaveBeenCalled();
-
-    render(<Popup {...defaultProps} />);
 
     expect(console.error).not.toHaveBeenCalled();
+    render(<Popup />);
+    expect(console.error).not.toHaveBeenCalled();
+
     mockError.restore();
   });
 
-  it("should display a button that shows enabled state", () => {
-    expect.assertions(4);
-    const popup1 = render(<Popup {...defaultProps} />);
-
-    let enabledButton1 = popup1.getByTestId("toggle-enabled");
-
-    expect(enabledButton1).toBeInstanceOf(HTMLButtonElement);
-    expect(
-      getProperties(enabledButton1).pendingProps.style.backgroundColor
-    ).toEqual("green");
-
-    popup1.unmount();
-
-    store.get.mockImplementation((k: keyof StoreState) => {
-      if (k === "enabled") return false;
-      else return defaults.store[k];
-    });
-    const popup2 = render(<Popup {...defaultProps} />);
-
-    let enabledButton2 = popup2.getByTestId("toggle-enabled");
-
-    expect(enabledButton2).toBeInstanceOf(HTMLButtonElement);
-    expect(
-      getProperties(enabledButton2).pendingProps.style.backgroundColor
-    ).toEqual("red");
-  });
-
-  it("should display a button that calls store.toggleEnabled", () => {
+  it("should call useGenStore", () => {
     expect.assertions(2);
 
-    const { getByTestId } = render(<Popup {...defaultProps} />);
-
-    let button = getByTestId("toggle-enabled");
-
-    expect(store.toggleEnabled).not.toHaveBeenCalled();
-
-    // Toggle button
-    fireEvent.click(button);
-
-    expect(store.toggleEnabled).toHaveBeenCalledTimes(1);
+    expect(mockUseGenStore).not.toHaveBeenCalled();
+    render(<Popup />);
+    expect(mockUseGenStore).toHaveBeenCalledTimes(1);
   });
 
-  it("should display a button that shows blocking state", () => {
-    expect.assertions(6);
-    const popup1 = render(<Popup {...defaultProps} />);
+  describe("enabled button", () => {
+    it("should display enabled state", () => {
+      expect.assertions(6);
+      const popup1 = render(<Popup />);
+      const enabledButton1 = popup1.getByTestId("toggle-enabled");
 
-    let blockingButton1 = popup1.getByTestId("blocking-switch");
+      expect(enabledButton1).toBeInstanceOf(HTMLButtonElement);
+      expect(
+        getProperties(enabledButton1).pendingProps.style.backgroundColor
+      ).toEqual("green");
+      expect(enabledButton1.textContent).toEqual("Disable");
 
-    expect(blockingButton1).toBeInstanceOf(HTMLButtonElement);
-    expect(blockingButton1.textContent).toEqual("Blocking: NONE");
+      popup1.unmount();
 
-    popup1.unmount();
+      mockUseGenStore.mockImplementation(() => {
+        return [
+          {
+            ...defaults.generalStore,
+            enabled: false,
+          },
+          actions,
+        ];
+      });
+      const popup2 = render(<Popup />);
+      const enabledButton2 = popup2.getByTestId("toggle-enabled");
 
-    store.get.mockImplementation((k: keyof StoreState) => {
-      if (k === "blocking") return Blocking.BLACKLIST;
-      else return defaults.store[k];
+      expect(enabledButton2).toBeInstanceOf(HTMLButtonElement);
+      expect(
+        getProperties(enabledButton2).pendingProps.style.backgroundColor
+      ).toEqual("red");
+      expect(enabledButton2.textContent).toEqual("Enable");
     });
-    const popup2 = render(<Popup {...defaultProps} />);
 
-    let blockingButton2 = popup2.getByTestId("blocking-switch");
+    it("should call toggleEnabled", () => {
+      expect.assertions(2);
 
-    expect(blockingButton2).toBeInstanceOf(HTMLButtonElement);
-    expect(blockingButton2.textContent).toEqual("Blocking: BLACKLIST");
+      expect(actions.toggleEnabled).not.toHaveBeenCalled();
 
-    popup2.unmount();
+      const { getByTestId } = render(<Popup />);
+      const toggleEnabled = getByTestId("toggle-enabled");
 
-    store.get.mockImplementation((k: keyof StoreState) => {
-      if (k === "blocking") return Blocking.WHITELIST;
-      else return defaults.store[k];
+      fireEvent.click(toggleEnabled);
+
+      expect(actions.toggleEnabled).toHaveBeenCalledTimes(1);
     });
-    render(<Popup {...defaultProps} />);
-
-    let blockingButton3 = popup2.getByTestId("blocking-switch");
-
-    expect(blockingButton3).toBeInstanceOf(HTMLButtonElement);
-    expect(blockingButton3.textContent).toEqual("Blocking: WHITELIST");
   });
 
-  it("should display a button that calls store.switchBlocking", async () => {
-    expect.assertions(2);
+  describe("switchBlocking button", () => {
+    it("should display blocking state", () => {
+      expect.assertions(6);
+      const popup1 = render(<Popup />);
+      const switchBlocking1 = popup1.getByTestId("switch-blocking");
 
-    const { getByTestId } = render(<Popup {...defaultProps} />);
+      expect(switchBlocking1).toBeInstanceOf(HTMLButtonElement);
+      expect(switchBlocking1.textContent).toEqual("Blocking: NONE");
 
-    let button = getByTestId("blocking-switch");
+      popup1.unmount();
 
-    expect(store.switchBlocking).not.toHaveBeenCalled();
+      mockUseGenStore.mockImplementation(() => {
+        return [
+          {
+            ...defaults.generalStore,
+            blocking: Blocking.BLACKLIST,
+          },
+          actions,
+        ];
+      });
+      const popup2 = render(<Popup />);
+      const switchBlocking2 = popup2.getByTestId("switch-blocking");
 
-    // Toggle button
-    fireEvent.click(button);
+      expect(switchBlocking2).toBeInstanceOf(HTMLButtonElement);
+      expect(switchBlocking2.textContent).toEqual("Blocking: BLACKLIST");
 
-    expect(store.switchBlocking).toHaveBeenCalledTimes(1);
+      popup2.unmount();
+
+      mockUseGenStore.mockImplementation(() => {
+        return [
+          {
+            ...defaults.generalStore,
+            blocking: Blocking.WHITELIST,
+          },
+          actions,
+        ];
+      });
+      const popup3 = render(<Popup />);
+      const switchBlocking3 = popup3.getByTestId("switch-blocking");
+
+      expect(switchBlocking3).toBeInstanceOf(HTMLButtonElement);
+      expect(switchBlocking3.textContent).toEqual("Blocking: WHITELIST");
+    });
+
+    it("should call switchBlocking", () => {
+      expect.assertions(2);
+
+      expect(actions.switchBlocking).not.toHaveBeenCalled();
+
+      const { getByTestId } = render(<Popup />);
+      const switchBlocking = getByTestId("switch-blocking");
+
+      fireEvent.click(switchBlocking);
+
+      expect(actions.switchBlocking).toHaveBeenCalledTimes(1);
+    });
   });
 });
