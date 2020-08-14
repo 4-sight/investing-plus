@@ -77,9 +77,10 @@ export const toggleEnabled = () => {
 };
 
 export const switchBlocking = () => {
+  const blockingOptions = Object.keys(Blocking).length / 2;
   generalStore.set({
     blocking:
-      (generalStore.get("blocking") + Object.keys(Blocking).length / 2 + 1) % 3,
+      (generalStore.get("blocking") + (blockingOptions + 1)) % blockingOptions,
   });
 
   sendRuntimeMessage({

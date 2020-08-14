@@ -313,8 +313,9 @@ describe("eventPage", () => {
     it("should call generalStore.set with expected blocking state", () => {
       expect.assertions(7);
 
-      generalStore.set({ blocking: 0 });
       const genStoreSpy = jest.spyOn(generalStore, "set");
+
+      generalStore.set({ blocking: 0 });
       genStoreSpy.mockClear();
       expect(genStoreSpy).not.toHaveBeenCalled();
 
@@ -332,7 +333,7 @@ describe("eventPage", () => {
         blocking: 2,
       });
 
-      generalStore.set({ blocking: Object.keys(Blocking).length - 1 });
+      generalStore.set({ blocking: Object.keys(Blocking).length / 2 - 1 });
       genStoreSpy.mockClear();
       switchBlocking();
       expect(genStoreSpy).toHaveBeenCalledTimes(1);
