@@ -1,34 +1,29 @@
-import { EventMessage, Blocking } from "../../types";
+import { EventMessage } from "../../types";
 import {
-  PortHandler,
-  GeneralStore,
-  UsersStore,
-  PortHandlerStore,
-  Styles,
-} from "../Classes";
+  linkToContentScript,
+  toggleEnabled,
+  switchBlocking,
+} from "../eventPage";
+import { GeneralStore } from "../Classes";
 
 const {
   CONTENT_SCRIPT_MOUNTED,
   POPUP_MOUNTED,
-  GEN_STORE_UPDATED,
   TOGGLE_ENABLED,
   SWITCH_BLOCKING,
 } = EventMessage;
 
-const sendRuntimeMessage = (message: { type: EventMessage; payload?: any }) => {
+export const sendRuntimeMessage = (message: {
+  type: EventMessage;
+  payload?: any;
+}) => {
   chrome.runtime.sendMessage(message);
 };
-const setSync = (payload: { [x: string]: any }) => {
+export const setSync = (payload: { [x: string]: any }) => {
   chrome.storage.sync.set(payload);
 };
 
-export const runtimeListener = (
-  genStore: GeneralStore,
-  blackList: UsersStore,
-  whiteList: UsersStore,
-  styles: Styles,
-  portHandlerStore: PortHandlerStore
-) => (
+export const runtimeListener = (genStore: GeneralStore) => (
   req,
   sender: chrome.runtime.MessageSender,
   sendResponse: (response?: any) => void
@@ -39,14 +34,7 @@ export const runtimeListener = (
     switch (req.type) {
       // CONTENT_SCRIPT_MOUNTED
       case CONTENT_SCRIPT_MOUNTED:
-        const portHandler = new PortHandler(
-          sender.tab,
-          portHandlerStore.removePort(sender.tab.id)
-        );
-
-        portHandler.initialize(styles.getStyleRules(), genStore.get("enabled"));
-
-        portHandlerStore.addPort(sender.tab.id, portHandler);
+        linkToContentScript(sender.tab);
         break;
 
       case POPUP_MOUNTED:
@@ -55,42 +43,12 @@ export const runtimeListener = (
 
       // TOGGLE_ENABLED
       case TOGGLE_ENABLED:
-        genStore.set({ enabled: !genStore.get("enabled") });
-
-        sendRuntimeMessage({
-          type: GEN_STORE_UPDATED,
-          payload: genStore.getState(),
-        });
-
-        setSync(genStore.getState());
-
-        genStore.get("enabled")
-          ? portHandlerStore.enablePorts()
-          : portHandlerStore.disablePorts();
+        toggleEnabled();
         break;
 
       // SWITCH_BLOCKING
       case SWITCH_BLOCKING:
-        genStore.set({
-          blocking:
-            (genStore.get("blocking") + Object.keys(Blocking).length / 2 + 1) %
-            3,
-        });
-
-        sendRuntimeMessage({
-          type: GEN_STORE_UPDATED,
-          payload: genStore.getState(),
-        });
-
-        setSync(genStore.getState());
-
-        styles.updateStyles(
-          genStore.getState(),
-          blackList.getUsers(),
-          whiteList.getUsers()
-        );
-
-        portHandlerStore.updatePorts(styles.getStyleRules());
+        switchBlocking();
         break;
 
       default:
