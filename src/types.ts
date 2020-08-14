@@ -3,6 +3,7 @@ import { PortHandler } from "./eventPage/Classes";
 export enum Blocking {
   "BLACKLIST",
   "WHITELIST",
+  "HIGHLIGHT",
   "NONE",
 }
 

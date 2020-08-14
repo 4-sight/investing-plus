@@ -8,6 +8,7 @@ export class Styles {
   constructor(genState: GeneralStoreState, blackList: Users, whiteList: Users) {
     this.createBlackListStyles(blackList);
     this.createWhiteListStyles(whiteList);
+    this.createHighlightStyles(whiteList);
     this.updateStyleRules(genState);
   }
 
@@ -22,6 +23,20 @@ export class Styles {
         .reduce(
           (style: string, user: User) =>
             style + ` .js-comment[data-user-id="${user.id}"] {display: none;}`,
+          ""
+        )
+        .trim()
+    );
+  };
+
+  private createHighlightStyles = (whiteList: Users) => {
+    this.styleMap.set(
+      "highlight",
+      whiteList
+        .reduce(
+          (style: string, user: User) =>
+            style +
+            ` .js-comment[data-user-id="${user.id}"] {border: 2px solid blue;}`,
           ""
         )
         .trim()
@@ -52,6 +67,7 @@ export class Styles {
 
   updateWhiteList = (whiteList: Users, genState: GeneralStoreState): string => {
     this.createWhiteListStyles(whiteList);
+    this.createHighlightStyles(whiteList);
     this.updateStyleRules(genState);
     return this.styleRules;
   };
@@ -63,6 +79,7 @@ export class Styles {
   ): string => {
     this.createBlackListStyles(blackList);
     this.createWhiteListStyles(whiteList);
+    this.createHighlightStyles(whiteList);
     this.updateStyleRules(genState);
     return this.styleRules;
   };

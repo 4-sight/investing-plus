@@ -23,9 +23,11 @@ describe("generateRules", () => {
 
       const blackList = "test-string-1 test-string-2 test-string-3";
       const whiteList = "test-string-4 test-string-5 test-string-6";
+      const highlight = "test-string-7 test-string-8 test-string-9";
       const styleMap1 = new Map([
         ["blackList", blackList],
         ["whiteList", whiteList],
+        ["highlight", highlight],
       ]);
 
       const rules = generateRules(styleMap1, {
@@ -36,14 +38,16 @@ describe("generateRules", () => {
       expect(rules).toContain(blackList);
     });
 
-    it("should return a string not containing the whiteList from the style map", () => {
-      expect.assertions(1);
+    it("should return a string not containing the whiteList/highlight from the style map", () => {
+      expect.assertions(2);
 
       const blackList = "test-string-1 test-string-2 test-string-3";
       const whiteList = "test-string-4 test-string-5 test-string-6";
+      const highlight = "test-string-7 test-string-8 test-string-9";
       const styleMap1 = new Map([
         ["blackList", blackList],
         ["whiteList", whiteList],
+        ["highlight", highlight],
       ]);
 
       const rules = generateRules(styleMap1, {
@@ -52,6 +56,7 @@ describe("generateRules", () => {
       });
 
       expect(rules).not.toContain(whiteList);
+      expect(rules).not.toContain(highlight);
     });
   });
 
@@ -61,9 +66,11 @@ describe("generateRules", () => {
 
       const blackList = "test-string-1 test-string-2 test-string-3";
       const whiteList = "test-string-4 test-string-5 test-string-6";
+      const highlight = "test-string-7 test-string-8 test-string-9";
       const styleMap1 = new Map([
         ["blackList", blackList],
         ["whiteList", whiteList],
+        ["highlight", highlight],
       ]);
 
       const rules = generateRules(styleMap1, {
@@ -74,14 +81,16 @@ describe("generateRules", () => {
       expect(rules).toContain(whiteList);
     });
 
-    it("should return a string not containing the blackList from the style map", () => {
-      expect.assertions(1);
+    it("should return a string not containing the blackList/highlight from the style map", () => {
+      expect.assertions(2);
 
       const blackList = "test-string-1 test-string-2 test-string-3";
       const whiteList = "test-string-4 test-string-5 test-string-6";
+      const highlight = "test-string-7 test-string-8 test-string-9";
       const styleMap1 = new Map([
         ["blackList", blackList],
         ["whiteList", whiteList],
+        ["highlight", highlight],
       ]);
 
       const rules = generateRules(styleMap1, {
@@ -90,6 +99,50 @@ describe("generateRules", () => {
       });
 
       expect(rules).not.toContain(blackList);
+      expect(rules).not.toContain(highlight);
+    });
+  });
+
+  describe("blocking: HIGHLIGHT", () => {
+    it("should return a string containing the highlights from the style map", () => {
+      expect.assertions(1);
+
+      const blackList = "test-string-1 test-string-2 test-string-3";
+      const whiteList = "test-string-4 test-string-5 test-string-6";
+      const highlight = "test-string-7 test-string-8 test-string-9";
+      const styleMap1 = new Map([
+        ["blackList", blackList],
+        ["whiteList", whiteList],
+        ["highlight", highlight],
+      ]);
+
+      const rules = generateRules(styleMap1, {
+        ...defaults.generalStore,
+        blocking: Blocking.HIGHLIGHT,
+      });
+
+      expect(rules).toContain(highlight);
+    });
+
+    it("should return a string not containing the white/blackList from the style map", () => {
+      expect.assertions(2);
+
+      const blackList = "test-string-1 test-string-2 test-string-3";
+      const whiteList = "test-string-4 test-string-5 test-string-6";
+      const highlight = "test-string-7 test-string-8 test-string-9";
+      const styleMap1 = new Map([
+        ["blackList", blackList],
+        ["whiteList", whiteList],
+        ["highlight", highlight],
+      ]);
+
+      const rules = generateRules(styleMap1, {
+        ...defaults.generalStore,
+        blocking: Blocking.HIGHLIGHT,
+      });
+
+      expect(rules).not.toContain(blackList);
+      expect(rules).not.toContain(whiteList);
     });
   });
 

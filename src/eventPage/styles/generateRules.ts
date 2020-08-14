@@ -21,6 +21,13 @@ export const generateRules = (
       }
       break;
 
+    case Blocking.HIGHLIGHT:
+      {
+        const highlighted = styles.get("highlight");
+        highlighted && activeStyles.push(highlighted);
+      }
+      break;
+
     case Blocking.NONE:
       break;
   }

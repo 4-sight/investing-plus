@@ -50,8 +50,11 @@ describe("Styles", () => {
         '.js-comment[data-user-id="555-1"] {display: none;} .js-comment[data-user-id="555-2"] {display: none;} .js-comment[data-user-id="555-3"] {display: none;}';
       const whiteListStyles =
         '.js-comment {display: none;} .js-comment[data-user-id="555-4"] {display: block;} .js-comment[data-user-id="555-5"] {display: block;} .js-comment[data-user-id="555-6"] {display: block;}';
+      const highlightStyles =
+        '.js-comment[data-user-id="555-4"] {border: 2px solid blue;} .js-comment[data-user-id="555-5"] {border: 2px solid blue;} .js-comment[data-user-id="555-6"] {border: 2px solid blue;}';
       expectedStyleMap.set("blackList", blackListStyles);
       expectedStyleMap.set("whiteList", whiteListStyles);
+      expectedStyleMap.set("highlight", highlightStyles);
 
       expect(typeof styleRules).toBe("string");
       expect(styleRules).toEqual("test-string");
@@ -75,6 +78,7 @@ describe("Styles", () => {
         new Map([
           ["blackList", ""],
           ["whiteList", ""],
+          ["highlight", ""],
         ]),
         mockGenStore.getState()
       );
@@ -100,8 +104,11 @@ describe("Styles", () => {
         '.js-comment[data-user-id="555-1"] {display: none;} .js-comment[data-user-id="555-2"] {display: none;} .js-comment[data-user-id="555-3"] {display: none;}';
       const whiteListStyles =
         '.js-comment {display: none;} .js-comment[data-user-id="555-4"] {display: block;} .js-comment[data-user-id="555-5"] {display: block;} .js-comment[data-user-id="555-6"] {display: block;}';
+      const highlightStyles =
+        '.js-comment[data-user-id="555-4"] {border: 2px solid blue;} .js-comment[data-user-id="555-5"] {border: 2px solid blue;} .js-comment[data-user-id="555-6"] {border: 2px solid blue;}';
       expectedStyleMap.set("blackList", blackListStyles);
       expectedStyleMap.set("whiteList", whiteListStyles);
+      expectedStyleMap.set("highlight", highlightStyles);
 
       expect(typeof styleRules).toBe("string");
       expect(styleRules).toEqual("test-string");
@@ -125,6 +132,7 @@ describe("Styles", () => {
         new Map([
           ["blackList", ""],
           ["whiteList", ""],
+          ["highlight", ""],
         ]),
         mockGenStore.getState()
       );
@@ -143,6 +151,7 @@ describe("Styles", () => {
         '.js-comment[data-user-id="555-1"] {display: none;} .js-comment[data-user-id="555-2"] {display: none;} .js-comment[data-user-id="555-3"] {display: none;}';
       expectedStyleMap.set("blackList", blackListStyles);
       expectedStyleMap.set("whiteList", "");
+      expectedStyleMap.set("highlight", "");
 
       expect(typeof styleRules).toBe("string");
       expect(styleRules).toEqual("test-string");
@@ -166,6 +175,7 @@ describe("Styles", () => {
         new Map([
           ["blackList", ""],
           ["whiteList", ""],
+          ["highlight", ""],
         ]),
         mockGenStore.getState()
       );
@@ -183,8 +193,11 @@ describe("Styles", () => {
       const expectedStyleMap = new Map();
       const whiteListStyles =
         '.js-comment {display: none;} .js-comment[data-user-id="555-4"] {display: block;} .js-comment[data-user-id="555-5"] {display: block;} .js-comment[data-user-id="555-6"] {display: block;}';
+      const highlightStyles =
+        '.js-comment[data-user-id="555-4"] {border: 2px solid blue;} .js-comment[data-user-id="555-5"] {border: 2px solid blue;} .js-comment[data-user-id="555-6"] {border: 2px solid blue;}';
       expectedStyleMap.set("blackList", "");
       expectedStyleMap.set("whiteList", whiteListStyles);
+      expectedStyleMap.set("highlight", highlightStyles);
 
       expect(typeof styleRules).toBe("string");
       expect(styleRules).toEqual("test-string");
