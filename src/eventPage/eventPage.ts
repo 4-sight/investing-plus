@@ -129,6 +129,7 @@ export const addContextMenuListener = () => {
 };
 
 export const createContextMenuItems = () => {
+  chrome.contextMenus.removeAll();
   chrome.contextMenus.create({
     id: "add-to-blackList",
     title: "Block User",

@@ -84,6 +84,7 @@ describe("eventPage", () => {
     chrome.storage.onChanged.clearListeners();
     chrome.contextMenus.onClicked.clearListeners();
     chrome.contextMenus.create.mockClear();
+    chrome.contextMenus.removeAll.mockClear();
   });
 
   //======================================
@@ -630,6 +631,14 @@ describe("eventPage", () => {
   });
 
   describe("createContextMenuItems", () => {
+    it("should call contextMenus.removeAll", () => {
+      expect.assertions(2);
+
+      expect(chrome.contextMenus.removeAll).not.toHaveBeenCalled();
+      createContextMenuItems();
+      expect(chrome.contextMenus.removeAll).toHaveBeenCalledTimes(1);
+    });
+
     it("should call contextMenus.create with add-to-blackList", () => {
       expect.assertions(3);
 
