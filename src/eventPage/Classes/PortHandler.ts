@@ -1,4 +1,4 @@
-import { ScriptCommand, GeneralStoreState, Users } from "../../types";
+import { ScriptCommand } from "../../types";
 
 export class PortHandler {
   private port: chrome.runtime.Port;

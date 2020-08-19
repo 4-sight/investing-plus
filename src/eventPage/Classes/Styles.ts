@@ -1,4 +1,10 @@
-import { StyleMap, GeneralStoreState, Users, User } from "../../types";
+import {
+  StyleMap,
+  GeneralStoreState,
+  Users,
+  User,
+  StyleRule,
+} from "../../types";
 import { generateRules } from "../styles";
 
 export class Styles {
@@ -8,7 +14,8 @@ export class Styles {
   constructor(genState: GeneralStoreState, blackList: Users, whiteList: Users) {
     this.createBlackListStyles(blackList);
     this.createWhiteListStyles(whiteList);
-    this.createHighlightStyles(whiteList);
+    this.createHighlightBlockedStyles(blackList);
+    this.createHighlightFavouriteStyles(whiteList);
     this.updateStyleRules(genState);
   }
 
@@ -18,7 +25,7 @@ export class Styles {
 
   private createBlackListStyles = (blackList: Users) => {
     this.styleMap.set(
-      "blackList",
+      StyleRule.BLACKLIST,
       blackList
         .reduce(
           (style: string, user: User) =>
@@ -29,9 +36,23 @@ export class Styles {
     );
   };
 
-  private createHighlightStyles = (whiteList: Users) => {
+  private createHighlightBlockedStyles = (blackList: Users) => {
     this.styleMap.set(
-      "highlight",
+      StyleRule.HIGHLIGHT_BLOCKED,
+      blackList
+        .reduce(
+          (style: string, user: User) =>
+            style +
+            ` .js-comment[data-user-id="${user.id}"] {border: 2px solid red;}`,
+          ""
+        )
+        .trim()
+    );
+  };
+
+  private createHighlightFavouriteStyles = (whiteList: Users) => {
+    this.styleMap.set(
+      StyleRule.HIGHLIGHT_FAVOURITE,
       whiteList
         .reduce(
           (style: string, user: User) =>
@@ -45,7 +66,7 @@ export class Styles {
 
   private createWhiteListStyles = (whiteList: Users) => {
     this.styleMap.set(
-      "whiteList",
+      StyleRule.WHITELIST,
       whiteList.length > 0
         ? whiteList
             .reduce(
@@ -61,13 +82,14 @@ export class Styles {
 
   updateBlackList = (blackList: Users, genState: GeneralStoreState): string => {
     this.createBlackListStyles(blackList);
+    this.createHighlightBlockedStyles(blackList);
     this.updateStyleRules(genState);
     return this.styleRules;
   };
 
   updateWhiteList = (whiteList: Users, genState: GeneralStoreState): string => {
     this.createWhiteListStyles(whiteList);
-    this.createHighlightStyles(whiteList);
+    this.createHighlightFavouriteStyles(whiteList);
     this.updateStyleRules(genState);
     return this.styleRules;
   };
@@ -79,7 +101,8 @@ export class Styles {
   ): string => {
     this.createBlackListStyles(blackList);
     this.createWhiteListStyles(whiteList);
-    this.createHighlightStyles(whiteList);
+    this.createHighlightBlockedStyles(blackList);
+    this.createHighlightFavouriteStyles(whiteList);
     this.updateStyleRules(genState);
     return this.styleRules;
   };

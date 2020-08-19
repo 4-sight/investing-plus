@@ -10,13 +10,13 @@ import {
   syncWhiteList,
   linkToContentScript,
   toggleEnabled,
+  toggleHighlightBlocked,
+  toggleHighlightFavourite,
   switchBlocking,
   addToBlackList,
   addToWhiteList,
-  addContextMenuListener,
   addRuntimeListener,
   addStorageListener,
-  createContextMenuItems,
   initializeEventPage,
   updateStyles,
   portHandlers,
@@ -27,7 +27,6 @@ import { defaults } from "../../testHelpers";
 import * as PortHandlerModule from "../Classes/PortHandler";
 import * as runtimeListenerModule from "../listeners/runtimeListener";
 import * as syncListenerModule from "../listeners/syncListener";
-import * as contextMenuListenerModule from "../listeners/contextMenuListener";
 
 jest.mock("../Classes/PortHandler", () => ({
   PortHandler: jest.fn(),
@@ -41,10 +40,6 @@ jest.mock("../listeners/syncListener", () => ({
   syncListener: jest.fn(),
 }));
 
-jest.mock("../listeners/contextMenuListener", () => ({
-  contextMenuListener: jest.fn(),
-}));
-
 const mockPortHandlerModule = PortHandlerModule as {
   PortHandler: jest.Mock;
 };
@@ -53,9 +48,6 @@ const mockRuntimeListenerModule = (runtimeListenerModule as unknown) as {
 };
 const mockSyncListenerModule = (syncListenerModule as unknown) as {
   syncListener: jest.Mock;
-};
-const mockContextMenuListenerModule = (contextMenuListenerModule as unknown) as {
-  contextMenuListener: jest.Mock;
 };
 
 describe("eventPage", () => {
@@ -71,7 +63,6 @@ describe("eventPage", () => {
   beforeEach(() => {
     mockRuntimeListenerModule.runtimeListener.mockClear();
     mockSyncListenerModule.syncListener.mockClear();
-    mockContextMenuListenerModule.contextMenuListener.mockClear();
     mockInitialize.mockClear();
     mockPortHandlerModule.PortHandler.mockClear();
     mockPortHandlerModule.PortHandler.mockImplementation(() => mockPortHandler);
@@ -256,7 +247,7 @@ describe("eventPage", () => {
       });
     });
 
-    it("should call runtime.sendMessage with GEN_STORE_UPDATED and current gen store state", () => {
+    it("should call runtime.sendMessage with GEN_STORE_UPDATED and current gen store state (toggleEnabled)", () => {
       expect.assertions(3);
 
       expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
@@ -270,7 +261,7 @@ describe("eventPage", () => {
       });
     });
 
-    it("should update the general store state in chrome storage", () => {
+    it("should update the general store state in chrome storage (toggleEnabled)", () => {
       expect.assertions(3);
 
       expect(chrome.storage.sync.set).not.toHaveBeenCalled();
@@ -307,6 +298,159 @@ describe("eventPage", () => {
       toggleEnabled();
 
       expect(disablePortsSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("toggleHighlightBlocked", () => {
+    it("should call generalStore.set with {highlightBlocked: !highlightBlocked}", () => {
+      expect.assertions(3);
+
+      const genStoreSpy = jest.spyOn(generalStore, "set");
+      genStoreSpy.mockClear();
+      const highlightBlocked = generalStore.get("highlightBlocked");
+      expect(genStoreSpy).not.toHaveBeenCalled();
+
+      toggleHighlightBlocked();
+
+      expect(genStoreSpy).toHaveBeenCalledTimes(1);
+      expect(genStoreSpy).toHaveBeenCalledWith({
+        highlightBlocked: !highlightBlocked,
+      });
+    });
+
+    it("should call runtime.sendMessage with GEN_STORE_UPDATED and current gen store state", () => {
+      expect.assertions(3);
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+
+      toggleHighlightBlocked();
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        type: EventMessage.GEN_STORE_UPDATED,
+        payload: generalStore.getState(),
+      });
+    });
+
+    it("should update the general store state in chrome storage", () => {
+      expect.assertions(3);
+
+      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
+
+      toggleHighlightBlocked();
+
+      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
+      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
+        generalStore: generalStore.getState(),
+      });
+    });
+
+    it("should call styles.updateStyles with genStore state, blackList users and whiteList user ", () => {
+      expect.assertions(3);
+
+      const styleSpy = jest.spyOn(styles, "updateStyles");
+      styleSpy.mockClear();
+      expect(styleSpy).not.toHaveBeenCalled();
+
+      toggleHighlightBlocked();
+
+      expect(styleSpy).toHaveBeenCalledTimes(1);
+      expect(styleSpy).toHaveBeenCalledWith(
+        generalStore.getState(),
+        blackList.getUsers(),
+        whiteList.getUsers()
+      );
+    });
+
+    it("should call portHandlers.updatePorts with the current style rules", () => {
+      expect.assertions(3);
+
+      const updatePortsSpy = jest.spyOn(portHandlers, "updatePorts");
+      generalStore.set({ enabled: false });
+
+      expect(updatePortsSpy).not.toHaveBeenCalled();
+
+      toggleHighlightBlocked();
+
+      expect(updatePortsSpy).toHaveBeenCalledTimes(1);
+      expect(updatePortsSpy).toHaveBeenCalledWith(styles.getStyleRules());
+    });
+  });
+
+  describe("toggleHighlightFavourite", () => {
+    it("should call generalStore.set with {highlightFavourite: !highlightFavourite}", () => {
+      expect.assertions(3);
+
+      const genStoreSpy = jest.spyOn(generalStore, "set");
+      genStoreSpy.mockClear();
+      const highlightFavourite = generalStore.get("highlightFavourite");
+      expect(genStoreSpy).not.toHaveBeenCalled();
+
+      toggleHighlightFavourite();
+
+      expect(genStoreSpy).toHaveBeenCalledTimes(1);
+      expect(genStoreSpy).toHaveBeenCalledWith({
+        highlightFavourite: !highlightFavourite,
+      });
+    });
+
+    it("should call runtime.sendMessage with GEN_STORE_UPDATED and current gen store state", () => {
+      expect.assertions(3);
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+
+      toggleHighlightFavourite();
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        type: EventMessage.GEN_STORE_UPDATED,
+        payload: generalStore.getState(),
+      });
+    });
+
+    it("should update the general store state in chrome storage", () => {
+      expect.assertions(3);
+
+      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
+
+      toggleHighlightFavourite();
+
+      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
+      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
+        generalStore: generalStore.getState(),
+      });
+    });
+
+    it("should call styles.updateStyles with genStore state, blackList users and whiteList user ", () => {
+      expect.assertions(3);
+
+      const styleSpy = jest.spyOn(styles, "updateStyles");
+      styleSpy.mockClear();
+      expect(styleSpy).not.toHaveBeenCalled();
+
+      toggleHighlightFavourite();
+
+      expect(styleSpy).toHaveBeenCalledTimes(1);
+      expect(styleSpy).toHaveBeenCalledWith(
+        generalStore.getState(),
+        blackList.getUsers(),
+        whiteList.getUsers()
+      );
+    });
+
+    it("should call portHandlers.updatePorts with the current style rules", () => {
+      expect.assertions(3);
+
+      const updatePortsSpy = jest.spyOn(portHandlers, "updatePorts");
+      updatePortsSpy.mockClear();
+      generalStore.set({ enabled: false });
+
+      expect(updatePortsSpy).not.toHaveBeenCalled();
+
+      toggleHighlightBlocked();
+
+      expect(updatePortsSpy).toHaveBeenCalledTimes(1);
+      expect(updatePortsSpy).toHaveBeenCalledWith(styles.getStyleRules());
     });
   });
 
@@ -370,7 +514,7 @@ describe("eventPage", () => {
       });
     });
 
-    it("should call styles.updateStyles with genStore state, blackList users and whiteList user ", () => {
+    it("should call styles.updateStyles with genStore state, blackList users and whiteList user (switchBlocking)", () => {
       expect.assertions(3);
 
       const styleSpy = jest.spyOn(styles, "updateStyles");
@@ -387,10 +531,11 @@ describe("eventPage", () => {
       );
     });
 
-    it("should call portHandlers.updatePorts with the current style rules", () => {
+    it("should call portHandlers.updatePorts with the current style rules (switchBlocking)", () => {
       expect.assertions(3);
 
       const updatePortsSpy = jest.spyOn(portHandlers, "updatePorts");
+      updatePortsSpy.mockClear();
       generalStore.set({ enabled: false });
 
       expect(updatePortsSpy).not.toHaveBeenCalled();
@@ -590,120 +735,20 @@ describe("eventPage", () => {
     });
   });
 
-  describe("addContextMenuListener", () => {
-    it("should call contextMenuListener with addToBlackList and addToWhiteList", () => {
-      expect.assertions(3);
-
-      expect(
-        mockContextMenuListenerModule.contextMenuListener
-      ).not.toHaveBeenCalled();
-
-      addContextMenuListener();
-
-      expect(
-        mockContextMenuListenerModule.contextMenuListener
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        mockContextMenuListenerModule.contextMenuListener
-      ).toHaveBeenCalledWith(addToBlackList, addToWhiteList);
-    });
-
-    it("should add the contextMenuListener to contextMenus.onClicked", () => {
-      expect.assertions(3);
-
-      expect(chrome.contextMenus.onClicked.hasListeners()).toBe(false);
-
-      addContextMenuListener();
-
-      expect(chrome.contextMenus.onClicked.hasListeners()).toBe(true);
-      expect(
-        chrome.contextMenus.onClicked.hasListener(
-          mockSyncListenerModule.syncListener(
-            generalStore,
-            blackList,
-            whiteList,
-            styles,
-            portHandlers
-          )
-        )
-      ).toBe(true);
-    });
-  });
-
-  describe("createContextMenuItems", () => {
-    it("should call contextMenus.removeAll", () => {
-      expect.assertions(2);
-
-      expect(chrome.contextMenus.removeAll).not.toHaveBeenCalled();
-      createContextMenuItems();
-      expect(chrome.contextMenus.removeAll).toHaveBeenCalledTimes(1);
-    });
-
-    it("should call contextMenus.create with add-to-blackList", () => {
-      expect.assertions(3);
-
-      const contextItemAddToBlackList = {
-        id: "add-to-blackList",
-        title: "Block User",
-        contexts: ["all"],
-      };
-
-      expect(chrome.contextMenus.create).not.toHaveBeenCalled();
-
-      createContextMenuItems();
-
-      expect(chrome.contextMenus.create).toHaveBeenCalled();
-      expect(chrome.contextMenus.create).toHaveBeenCalledWith(
-        contextItemAddToBlackList
-      );
-    });
-
-    it("should call contextMenus.create with add-to-whiteList", () => {
-      expect.assertions(3);
-
-      const contextItemAddToWhiteList = {
-        id: "add-to-whiteList",
-        title: "Favourite User",
-        contexts: ["all"],
-      };
-
-      expect(chrome.contextMenus.create).not.toHaveBeenCalled();
-
-      createContextMenuItems();
-
-      expect(chrome.contextMenus.create).toHaveBeenCalled();
-      expect(chrome.contextMenus.create).toHaveBeenCalledWith(
-        contextItemAddToWhiteList
-      );
-    });
-  });
-
   describe("initializeEventPage", () => {
-    it("should call addRuntimeListener, addStorageListener, createContextMenuItems, and addContextMenuListener", () => {
-      expect.assertions(8);
+    it("should call addRuntimeListener, and addStorageListener", () => {
+      expect.assertions(4);
 
       const addRuntimeSpy = jest.spyOn(evenPageFunctions, "addRuntimeListener");
       const addStorageSpy = jest.spyOn(evenPageFunctions, "addStorageListener");
-      const addContextMenuSpy = jest.spyOn(
-        evenPageFunctions,
-        "addContextMenuListener"
-      );
-      const createContextItemsSpy = jest.spyOn(
-        evenPageFunctions,
-        "createContextMenuItems"
-      );
 
       expect(addRuntimeSpy).not.toHaveBeenCalled();
       expect(addStorageSpy).not.toHaveBeenCalled();
-      expect(addContextMenuSpy).not.toHaveBeenCalled();
-      expect(createContextItemsSpy).not.toHaveBeenCalled();
 
       initializeEventPage();
 
       expect(addRuntimeSpy).toHaveBeenCalledTimes(1);
       expect(addStorageSpy).toHaveBeenCalledTimes(1);
-      expect(addContextMenuSpy).toHaveBeenCalledTimes(1);
-      expect(createContextItemsSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

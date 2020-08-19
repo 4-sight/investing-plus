@@ -1,6 +1,21 @@
-import { portListener } from "..";
+import { portListener, addMutationListener, removeMutationListeners } from "..";
 import { ScriptCommand } from "../../../types";
-import { createElement } from "react";
+import { addButtons, removeButtons } from "../../utils";
+
+jest.mock("../../utils/handleButtons", () => ({
+  addButtons: jest.fn(),
+  removeButtons: jest.fn(),
+}));
+
+jest.mock("../mutationListener", () => ({
+  addMutationListener: jest.fn(),
+  removeMutationListeners: jest.fn(),
+}));
+
+const mockAddButtons = (addButtons as unknown) as jest.Mock;
+const mockRemoveButtons = (removeButtons as unknown) as jest.Mock;
+const mockAddMutationListener = (addMutationListener as unknown) as jest.Mock;
+const mockRemoveMutationListeners = (removeMutationListeners as unknown) as jest.Mock;
 
 describe("portListener", () => {
   // Setup
@@ -13,14 +28,24 @@ describe("portListener", () => {
       appendChild: jest.fn(),
       removeChild: jest.fn(),
     },
+    getElementsByClassName: jest.fn(() => []),
   };
 
   global.document = (mockDoc as unknown) as Document;
+  global.MutationObserver = jest.fn(() => ({
+    observe: jest.fn(),
+    disconnect: jest.fn(),
+    takeRecords: jest.fn(),
+  }));
 
   beforeEach(() => {
     mockStyleElement.innerHTML = undefined;
     mockDoc.body.appendChild.mockClear();
     mockDoc.body.removeChild.mockClear();
+    mockAddButtons.mockClear();
+    mockRemoveButtons.mockClear();
+    mockAddMutationListener.mockClear();
+    mockRemoveMutationListeners.mockClear();
   });
 
   //=====================================
@@ -88,6 +113,58 @@ describe("portListener", () => {
 
       expect(mockDoc.body.appendChild).not.toHaveBeenCalled();
     });
+
+    it("should call addButtons if enabled: true", () => {
+      expect.assertions(2);
+
+      expect(mockAddButtons).not.toHaveBeenCalled();
+
+      portListener(mockStyleElement)({
+        type: ScriptCommand.INITIALIZE,
+        payload: { styles: "a-test-string", enabled: true },
+      });
+
+      expect(mockAddButtons).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call addMutationListener if enabled :true", () => {
+      expect.assertions(2);
+
+      expect(mockAddMutationListener).not.toHaveBeenCalled();
+
+      portListener(mockStyleElement)({
+        type: ScriptCommand.INITIALIZE,
+        payload: { styles: "a-test-string", enabled: true },
+      });
+
+      expect(mockAddMutationListener).toHaveBeenCalledTimes(1);
+    });
+
+    it("should not call addButtons if enabled: false", () => {
+      expect.assertions(2);
+
+      expect(mockAddButtons).not.toHaveBeenCalled();
+
+      portListener(mockStyleElement)({
+        type: ScriptCommand.INITIALIZE,
+        payload: { styles: "a-test-string", enabled: false },
+      });
+
+      expect(mockAddButtons).not.toHaveBeenCalled();
+    });
+
+    it("should call addMutationListener if enabled :false", () => {
+      expect.assertions(2);
+
+      expect(mockAddMutationListener).not.toHaveBeenCalled();
+
+      portListener(mockStyleElement)({
+        type: ScriptCommand.INITIALIZE,
+        payload: { styles: "a-test-string", enabled: false },
+      });
+
+      expect(mockAddMutationListener).not.toHaveBeenCalled();
+    });
   });
 
   describe("NEW_STYLE_RULES", () => {
@@ -139,6 +216,28 @@ describe("portListener", () => {
       expect(mockDoc.body.appendChild).toHaveBeenCalledTimes(1);
       expect(mockDoc.body.appendChild).toHaveBeenCalledWith(mockStyleElement);
     });
+
+    it("should call addButtons (ENABLE)", () => {
+      expect.assertions(2);
+
+      expect(mockAddButtons).not.toHaveBeenCalled();
+      portListener(mockStyleElement)({
+        type: ScriptCommand.ENABLE,
+      });
+
+      expect(mockAddButtons).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call addMutationListener (ENABLE)", () => {
+      expect.assertions(2);
+
+      expect(mockAddMutationListener).not.toHaveBeenCalled();
+      portListener(mockStyleElement)({
+        type: ScriptCommand.ENABLE,
+      });
+
+      expect(mockAddMutationListener).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("DISABLE", () => {
@@ -152,6 +251,30 @@ describe("portListener", () => {
 
       expect(mockDoc.body.removeChild).toHaveBeenCalledTimes(1);
       expect(mockDoc.body.removeChild).toHaveBeenCalledWith(mockStyleElement);
+    });
+
+    it("should call removeButtons", () => {
+      expect.assertions(2);
+
+      expect(mockRemoveButtons).not.toHaveBeenCalled();
+
+      portListener(mockStyleElement)({
+        type: ScriptCommand.DISABLE,
+      });
+
+      expect(mockRemoveButtons).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call removeMutationListeners", () => {
+      expect.assertions(2);
+
+      expect(mockRemoveMutationListeners).not.toHaveBeenCalled();
+
+      portListener(mockStyleElement)({
+        type: ScriptCommand.DISABLE,
+      });
+
+      expect(mockRemoveMutationListeners).toHaveBeenCalledTimes(1);
     });
   });
 });

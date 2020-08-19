@@ -3,7 +3,6 @@ import { PortHandler } from "./eventPage/Classes";
 export enum Blocking {
   "BLACKLIST",
   "WHITELIST",
-  "HIGHLIGHT",
   "NONE",
 }
 
@@ -14,7 +13,11 @@ export enum EventMessage {
   "BLACKLIST_UPDATED",
   "WHITELIST_UPDATED",
   "TOGGLE_ENABLED",
+  "TOGGLE_HIGHLIGHT_BLOCKED",
+  "TOGGLE_HIGHLIGHT_FAVOURITE",
   "SWITCH_BLOCKING",
+  "BLACKLIST_ADD",
+  "WHITELIST_ADD",
 }
 
 export type Message = {
@@ -40,6 +43,8 @@ export type UserMap = Map<string, User>;
 export type GeneralStoreState = {
   enabled: boolean;
   blocking: Blocking;
+  highlightFavourite: boolean;
+  highlightBlocked: boolean;
 };
 
 // export type StoreDispatch = (payload: Partial<StoreState>) => void;
@@ -51,6 +56,13 @@ export enum ScriptCommand {
   "NEW_STYLE_RULES",
 }
 
-export type StyleMap = Map<string, string>;
+export enum StyleRule {
+  "BLACKLIST",
+  "WHITELIST",
+  "HIGHLIGHT_BLOCKED",
+  "HIGHLIGHT_FAVOURITE",
+}
+
+export type StyleMap = Map<StyleRule, string>;
 
 export type PortMap = Map<number, PortHandler>;

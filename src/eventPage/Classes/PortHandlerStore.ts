@@ -8,6 +8,8 @@ export class PortHandlerStore {
     this.ports = initialPortMap || new Map();
   }
 
+  get = (id: number): PortHandler => this.ports.get(id);
+
   addPort = (id: number, port: PortHandler) => {
     this.ports.set(id, port);
   };

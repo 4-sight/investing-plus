@@ -1,4 +1,6 @@
 import { ScriptCommand } from "../../types";
+import { removeButtons, addButtons } from "../utils";
+import { addMutationListener, removeMutationListeners } from ".";
 
 export const portListener = (styleSheet) => ({
   type,
@@ -14,6 +16,8 @@ export const portListener = (styleSheet) => ({
 
         if (payload.enabled) {
           document.body.appendChild(styleSheet);
+          addButtons();
+          addMutationListener();
         }
       } else {
         throw new Error(
@@ -34,10 +38,14 @@ export const portListener = (styleSheet) => ({
 
     case ScriptCommand.ENABLE:
       document.body.appendChild(styleSheet);
+      addButtons();
+      addMutationListener();
       break;
 
     case ScriptCommand.DISABLE:
       document.body.removeChild(styleSheet);
+      removeButtons();
+      removeMutationListeners();
       break;
   }
 };

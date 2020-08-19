@@ -25,6 +25,7 @@ describe("GeneralStore", () => {
     expect.assertions(4);
 
     const mockSyncStore: GeneralStoreState = {
+      ...defaults.generalStore,
       enabled: false,
       blocking: Blocking.WHITELIST,
     };

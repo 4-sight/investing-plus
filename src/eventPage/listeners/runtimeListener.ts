@@ -2,7 +2,11 @@ import { EventMessage } from "../../types";
 import {
   linkToContentScript,
   toggleEnabled,
+  toggleHighlightBlocked,
+  toggleHighlightFavourite,
   switchBlocking,
+  addToBlackList,
+  addToWhiteList,
 } from "../eventPage";
 import { GeneralStore } from "../Classes";
 
@@ -10,7 +14,11 @@ const {
   CONTENT_SCRIPT_MOUNTED,
   POPUP_MOUNTED,
   TOGGLE_ENABLED,
+  TOGGLE_HIGHLIGHT_BLOCKED,
+  TOGGLE_HIGHLIGHT_FAVOURITE,
   SWITCH_BLOCKING,
+  BLACKLIST_ADD,
+  WHITELIST_ADD,
 } = EventMessage;
 
 export const sendRuntimeMessage = (message: {
@@ -32,7 +40,6 @@ export const runtimeListener = (genStore: GeneralStore) => (
 
   if (typeof req === "object" && "type" in req) {
     switch (req.type) {
-      // CONTENT_SCRIPT_MOUNTED
       case CONTENT_SCRIPT_MOUNTED:
         linkToContentScript(sender.tab);
         break;
@@ -41,14 +48,28 @@ export const runtimeListener = (genStore: GeneralStore) => (
         sendResponse(genStore.getState());
         break;
 
-      // TOGGLE_ENABLED
       case TOGGLE_ENABLED:
         toggleEnabled();
         break;
 
-      // SWITCH_BLOCKING
+      case TOGGLE_HIGHLIGHT_BLOCKED:
+        toggleHighlightBlocked();
+        break;
+
+      case TOGGLE_HIGHLIGHT_FAVOURITE:
+        toggleHighlightFavourite();
+        break;
+
       case SWITCH_BLOCKING:
         switchBlocking();
+        break;
+
+      case BLACKLIST_ADD:
+        addToBlackList(req.payload);
+        break;
+
+      case WHITELIST_ADD:
+        addToWhiteList(req.payload);
         break;
 
       default:

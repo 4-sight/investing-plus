@@ -1,6 +1,6 @@
 {
   "name": "investing-plus",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "A chrome extension to add extra features to https://www.investing.com",
   "scripts": {
     "test": "jest --watchAll",

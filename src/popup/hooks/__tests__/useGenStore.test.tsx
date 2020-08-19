@@ -64,6 +64,56 @@ describe("useGenStore", () => {
     });
   });
 
+  describe("toggleHighlightBlocked", () => {
+    it("should sendMessage TOGGLE_HIGHLIGHT_BLOCKED", () => {
+      expect.assertions(4);
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+
+      const {
+        result: {
+          current: [store, actions],
+        },
+      } = renderHook(() => useGenStore());
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        actions.toggleHighlightBlocked();
+      });
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(2);
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        type: EventMessage.TOGGLE_HIGHLIGHT_BLOCKED,
+      });
+    });
+  });
+
+  describe("toggleHighlightFavourite", () => {
+    it("should sendMessage TOGGLE_HIGHLIGHT_FAVOURITE", () => {
+      expect.assertions(4);
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+
+      const {
+        result: {
+          current: [store, actions],
+        },
+      } = renderHook(() => useGenStore());
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        actions.toggleHighlightFavourite();
+      });
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(2);
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        type: EventMessage.TOGGLE_HIGHLIGHT_FAVOURITE,
+      });
+    });
+  });
+
   describe("switchBlocking", () => {
     it("should sendMessage SWITCH_BLOCKING", () => {
       expect.assertions(4);

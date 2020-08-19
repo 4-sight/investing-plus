@@ -9,6 +9,8 @@ export type SetGenStore = React.Dispatch<
 type Listener = (req: any) => boolean;
 type Actions = {
   toggleEnabled: () => void;
+  toggleHighlightBlocked: () => void;
+  toggleHighlightFavourite: () => void;
   switchBlocking: () => void;
 };
 
@@ -47,12 +49,24 @@ export default function useGenStore(): [GeneralStoreState, Actions] {
     chrome.runtime.sendMessage({ type: EventMessage.TOGGLE_ENABLED });
   };
 
+  const toggleHighlightBlocked = () => {
+    chrome.runtime.sendMessage({ type: EventMessage.TOGGLE_HIGHLIGHT_BLOCKED });
+  };
+
+  const toggleHighlightFavourite = () => {
+    chrome.runtime.sendMessage({
+      type: EventMessage.TOGGLE_HIGHLIGHT_FAVOURITE,
+    });
+  };
+
   const switchBlocking = () => {
     chrome.runtime.sendMessage({ type: EventMessage.SWITCH_BLOCKING });
   };
 
   const actions = {
     toggleEnabled,
+    toggleHighlightBlocked,
+    toggleHighlightFavourite,
     switchBlocking,
   };
 

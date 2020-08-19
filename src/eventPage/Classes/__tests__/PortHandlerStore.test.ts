@@ -48,6 +48,26 @@ describe("PortHandlerStore", () => {
     });
   });
 
+  describe("Method - get", () => {
+    it("should return undefined if port doesn't exist", () => {
+      expect.assertions(1);
+
+      const mockPortMap: PortMap = new Map();
+      const portStore = new PortHandlerStore(mockPortMap);
+      expect(portStore.get(1234)).toBeUndefined();
+    });
+
+    it("should return a PortHandler if it exists", () => {
+      expect.assertions(1);
+
+      const mockPortMap: PortMap = new Map();
+      const portStore = new PortHandlerStore(mockPortMap);
+      portStore.addPort(12345, (mockPortHandler as unknown) as PortHandler);
+
+      expect(portStore.get(12345)).toEqual(mockPortHandler);
+    });
+  });
+
   describe("Method - removePort", () => {
     it("should return a function that removes a port", () => {
       expect.assertions(3);

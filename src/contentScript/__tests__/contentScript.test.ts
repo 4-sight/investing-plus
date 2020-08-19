@@ -14,6 +14,7 @@ describe("contentScript", () => {
   const mockStyle = "style-element";
   const document = {
     createElement: jest.fn(() => mockStyle),
+    getElementsByClassName: jest.fn(() => []),
   };
   const mockListener = "mock-listener";
 

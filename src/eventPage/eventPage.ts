@@ -6,11 +6,7 @@ import {
   Styles,
 } from "./Classes";
 import { defaultStores } from "../constants";
-import {
-  runtimeListener,
-  syncListener,
-  contextMenuListener,
-} from "./listeners";
+import { runtimeListener, syncListener } from "./listeners";
 import { EventMessage, Blocking, User } from "../types";
 
 export const generalStore = new GeneralStore(defaultStores.generalStore());
@@ -76,6 +72,34 @@ export const toggleEnabled = () => {
     : portHandlers.disablePorts();
 };
 
+export const toggleHighlightBlocked = () => {
+  generalStore.set({ highlightBlocked: !generalStore.get("highlightBlocked") });
+
+  sendRuntimeMessage({
+    type: EventMessage.GEN_STORE_UPDATED,
+    payload: generalStore.getState(),
+  });
+
+  syncGenStore();
+  updateStyles();
+  portHandlers.updatePorts(styles.getStyleRules());
+};
+
+export const toggleHighlightFavourite = () => {
+  generalStore.set({
+    highlightFavourite: !generalStore.get("highlightFavourite"),
+  });
+
+  sendRuntimeMessage({
+    type: EventMessage.GEN_STORE_UPDATED,
+    payload: generalStore.getState(),
+  });
+
+  syncGenStore();
+  updateStyles();
+  portHandlers.updatePorts(styles.getStyleRules());
+};
+
 export const switchBlocking = () => {
   const blockingOptions = Object.keys(Blocking).length / 2;
   generalStore.set({
@@ -122,32 +146,9 @@ export const addStorageListener = () => {
   );
 };
 
-export const addContextMenuListener = () => {
-  chrome.contextMenus.onClicked.addListener(
-    contextMenuListener(addToBlackList, addToWhiteList)
-  );
-};
-
-export const createContextMenuItems = () => {
-  chrome.contextMenus.removeAll();
-  chrome.contextMenus.create({
-    id: "add-to-blackList",
-    title: "Block User",
-    contexts: ["all"],
-  });
-
-  chrome.contextMenus.create({
-    id: "add-to-whiteList",
-    title: "Favourite User",
-    contexts: ["all"],
-  });
-};
-
 //=================================================
 
 export const initializeEventPage = () => {
   addRuntimeListener();
   addStorageListener();
-  createContextMenuItems();
-  addContextMenuListener();
 };
