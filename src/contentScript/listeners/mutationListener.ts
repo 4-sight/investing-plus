@@ -26,7 +26,7 @@ export const mutationListener = (
 };
 
 export const addMutationListener = (observers = observerList) => {
-  const config = { childList: true };
+  const config = { childList: true, subtree: true };
 
   const observer = new MutationObserver(mutationListener);
   observers.push(observer);
