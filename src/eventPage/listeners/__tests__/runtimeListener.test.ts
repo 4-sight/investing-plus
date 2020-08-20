@@ -6,7 +6,9 @@ import {
   toggleHighlightFavourite,
   switchBlocking,
   addToWhiteList,
+  removeFromWhiteList,
   addToBlackList,
+  removeFromBlackList,
 } from "../../eventPage";
 import { GeneralStore } from "../../Classes";
 import { defaults } from "../../../testHelpers";
@@ -19,7 +21,9 @@ jest.mock("../../eventPage", () => ({
   toggleHighlightFavourite: jest.fn(),
   switchBlocking: jest.fn(),
   addToBlackList: jest.fn(),
+  removeFromBlackList: jest.fn(),
   addToWhiteList: jest.fn(),
+  removeFromWhiteList: jest.fn(),
 }));
 
 const mockLinkToContentScript = (linkToContentScript as unknown) as jest.Mock;
@@ -28,7 +32,9 @@ const mockToggleHighlightBlocked = (toggleHighlightBlocked as unknown) as jest.M
 const mockToggleHighlightFavourite = (toggleHighlightFavourite as unknown) as jest.Mock;
 const mockSwitchBlocking = (switchBlocking as unknown) as jest.Mock;
 const mockAddToBlackList = (addToBlackList as unknown) as jest.Mock;
+const mockRemoveFromBlackList = (removeFromBlackList as unknown) as jest.Mock;
 const mockAddToWhiteList = (addToWhiteList as unknown) as jest.Mock;
+const mockRemoveFromWhiteList = (removeFromWhiteList as unknown) as jest.Mock;
 
 describe("runtimeListener", () => {
   // Setup
@@ -44,7 +50,9 @@ describe("runtimeListener", () => {
     mockToggleHighlightFavourite.mockClear();
     mockSwitchBlocking.mockClear();
     mockAddToBlackList.mockClear();
+    mockRemoveFromBlackList.mockClear();
     mockAddToWhiteList.mockClear();
+    mockRemoveFromWhiteList.mockClear();
     mockGenStore = new GeneralStore(defaults.generalStore);
 
     listener = runtimeListener(mockGenStore);
@@ -191,6 +199,27 @@ describe("runtimeListener", () => {
     });
   });
 
+  describe("BLACKLIST_REMOVE", () => {
+    it("should call removeFromBlackList, with the payload", () => {
+      expect.assertions(3);
+
+      expect(mockRemoveFromBlackList).not.toHaveBeenCalled();
+
+      const user = { name: "test-user-name", id: "test-user-id" };
+      listener(
+        {
+          type: EventMessage.BLACKLIST_REMOVE,
+          payload: user,
+        },
+        {},
+        () => {}
+      );
+
+      expect(mockRemoveFromBlackList).toHaveBeenCalledTimes(1);
+      expect(mockRemoveFromBlackList).toHaveBeenCalledWith(user);
+    });
+  });
+
   describe("WHITELIST_ADD", () => {
     it("should call addToWhiteList, with the payload", () => {
       expect.assertions(3);
@@ -209,6 +238,27 @@ describe("runtimeListener", () => {
 
       expect(mockAddToWhiteList).toHaveBeenCalledTimes(1);
       expect(mockAddToWhiteList).toHaveBeenCalledWith(user);
+    });
+  });
+
+  describe("WHITELIST_REMOVE", () => {
+    it("should call removeFromWhiteList, with the payload", () => {
+      expect.assertions(3);
+
+      expect(mockRemoveFromWhiteList).not.toHaveBeenCalled();
+
+      const user = { name: "test-user-name", id: "test-user-id" };
+      listener(
+        {
+          type: EventMessage.WHITELIST_REMOVE,
+          payload: user,
+        },
+        {},
+        () => {}
+      );
+
+      expect(mockRemoveFromWhiteList).toHaveBeenCalledTimes(1);
+      expect(mockRemoveFromWhiteList).toHaveBeenCalledWith(user);
     });
   });
 });

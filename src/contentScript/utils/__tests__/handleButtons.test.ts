@@ -1,19 +1,30 @@
 import { addButtons, removeButtons, sectionClassName } from "..";
-import { blackListUser, whiteListUser } from "../../utils";
+import {
+  blackListAdd,
+  blackListRemove,
+  whiteListAdd,
+  whiteListRemove,
+} from "../../utils";
 
-jest.mock("../../utils/blackListUser", () => ({
-  blackListUser: jest.fn(),
+jest.mock("../../utils/blackList", () => ({
+  blackListAdd: jest.fn(),
+  blackListRemove: jest.fn(),
 }));
 
-jest.mock("../../utils/whiteListUser", () => ({
-  whiteListUser: jest.fn(),
+jest.mock("../../utils/whiteList", () => ({
+  whiteListAdd: jest.fn(),
+  whiteListRemove: jest.fn(),
 }));
 
-const mockBlackListUser = (blackListUser as unknown) as jest.Mock;
-const mockWhiteListUser = (whiteListUser as unknown) as jest.Mock;
+const mockBlackListAdd = (blackListAdd as unknown) as jest.Mock;
+const mockBlackListRemove = (blackListRemove as unknown) as jest.Mock;
+const mockWhiteListAdd = (whiteListAdd as unknown) as jest.Mock;
+const mockWhiteListRemove = (whiteListRemove as unknown) as jest.Mock;
 
-const mockBlackListOnClick = jest.fn();
-const mockWhiteListOnClick = jest.fn();
+const mockBlackListAddOnClick = jest.fn();
+const mockBlackListRemoveOnClick = jest.fn();
+const mockWhiteListAddOnClick = jest.fn();
+const mockWhiteListRemoveOnClick = jest.fn();
 
 class MockDiv {
   children = [];
@@ -108,18 +119,24 @@ describe("addButtons", () => {
   // Setup
 
   beforeEach(() => {
-    mockBlackListUser.mockClear();
-    mockWhiteListUser.mockClear();
+    mockBlackListAdd.mockClear();
+    mockBlackListRemove.mockClear();
+    mockWhiteListAdd.mockClear();
+    mockWhiteListRemove.mockClear();
     mockDoc.createElement.mockClear();
     mockDoc.getElementsByClassName.mockClear();
     mockUserNameWrapper1.append.mockClear();
     mockUserNameWrapper2.append.mockClear();
     mockComment1.getElementsByClassName.mockClear();
     mockComment2.getElementsByClassName.mockClear();
-    mockBlackListOnClick.mockClear();
-    mockWhiteListOnClick.mockClear();
-    mockBlackListUser.mockImplementation(() => mockBlackListOnClick);
-    mockWhiteListUser.mockImplementation(() => mockWhiteListOnClick);
+    mockBlackListAddOnClick.mockClear();
+    mockBlackListRemoveOnClick.mockClear();
+    mockWhiteListAddOnClick.mockClear();
+    mockWhiteListRemoveOnClick.mockClear();
+    mockBlackListAdd.mockImplementation(() => mockBlackListAddOnClick);
+    mockBlackListRemove.mockImplementation(() => mockBlackListRemoveOnClick);
+    mockWhiteListAdd.mockImplementation(() => mockWhiteListAddOnClick);
+    mockWhiteListRemove.mockImplementation(() => mockWhiteListRemoveOnClick);
   });
 
   //===========================================
@@ -142,72 +159,133 @@ describe("addButtons", () => {
     expect(div2.className).toEqual(sectionClassName);
   });
 
-  it("should add two buttons to the div", () => {
-    expect.assertions(3);
+  it("should add four buttons to the div", () => {
+    expect.assertions(5);
 
     addButtons();
 
     const div = mockUserNameWrapper1.children[0];
-    expect(div.children.length).toEqual(2);
+    expect(div.children.length).toEqual(4);
     expect(div.children[0]).toBeInstanceOf(MockButton);
     expect(div.children[1]).toBeInstanceOf(MockButton);
+    expect(div.children[2]).toBeInstanceOf(MockButton);
+    expect(div.children[3]).toBeInstanceOf(MockButton);
   });
 
-  describe("blackList button", () => {
-    it("should call blackListUser with a username and id, on creation", () => {
+  describe("blackListAdd button", () => {
+    it("should call blackListAdd with a username and id, on creation", () => {
       expect.assertions(6);
 
-      expect(mockBlackListUser).not.toHaveBeenCalled();
+      expect(mockBlackListAdd).not.toHaveBeenCalled();
 
       addButtons();
 
-      expect(mockBlackListUser).toHaveBeenCalledTimes(2);
-      expect(mockBlackListUser.mock.calls[0][0]).toEqual(mockUserName1);
-      expect(mockBlackListUser.mock.calls[0][1]).toEqual(mockUserId1);
-      expect(mockBlackListUser.mock.calls[1][0]).toEqual(mockUserName2);
-      expect(mockBlackListUser.mock.calls[1][1]).toEqual(mockUserId2);
+      expect(mockBlackListAdd).toHaveBeenCalledTimes(2);
+      expect(mockBlackListAdd.mock.calls[0][0]).toEqual(mockUserName1);
+      expect(mockBlackListAdd.mock.calls[0][1]).toEqual(mockUserId1);
+      expect(mockBlackListAdd.mock.calls[1][0]).toEqual(mockUserName2);
+      expect(mockBlackListAdd.mock.calls[1][1]).toEqual(mockUserId2);
     });
 
-    it("should call blackListUser onclick", () => {
+    it("should call blackListAdd onclick", () => {
       expect.assertions(3);
 
-      expect(mockBlackListOnClick).not.toHaveBeenCalled();
+      expect(mockBlackListAddOnClick).not.toHaveBeenCalled();
       const blackListButton = mockUserNameWrapper1.children[0].children[0];
 
-      expect(mockBlackListOnClick).not.toHaveBeenCalled();
+      expect(mockBlackListAddOnClick).not.toHaveBeenCalled();
 
       blackListButton.onclick();
 
-      expect(mockBlackListOnClick).toHaveBeenCalledTimes(1);
+      expect(mockBlackListAddOnClick).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe("whiteList button", () => {
-    it("should call whiteListUser with a username and id, on creation", () => {
+  describe("blackListRemove button", () => {
+    it("should call blackListRemove with a username and id, on creation", () => {
       expect.assertions(6);
 
-      expect(mockWhiteListUser).not.toHaveBeenCalled();
+      expect(mockBlackListRemove).not.toHaveBeenCalled();
 
       addButtons();
 
-      expect(mockWhiteListUser).toHaveBeenCalledTimes(2);
-      expect(mockWhiteListUser.mock.calls[0][0]).toEqual(mockUserName1);
-      expect(mockWhiteListUser.mock.calls[0][1]).toEqual(mockUserId1);
-      expect(mockWhiteListUser.mock.calls[1][0]).toEqual(mockUserName2);
-      expect(mockWhiteListUser.mock.calls[1][1]).toEqual(mockUserId2);
+      expect(mockBlackListRemove).toHaveBeenCalledTimes(2);
+      expect(mockBlackListRemove.mock.calls[0][0]).toEqual(mockUserName1);
+      expect(mockBlackListRemove.mock.calls[0][1]).toEqual(mockUserId1);
+      expect(mockBlackListRemove.mock.calls[1][0]).toEqual(mockUserName2);
+      expect(mockBlackListRemove.mock.calls[1][1]).toEqual(mockUserId2);
     });
 
-    it("should call whiteListUser onclick", () => {
+    it("should call blackListRemove onclick", () => {
       expect.assertions(3);
 
-      expect(mockWhiteListOnClick).not.toHaveBeenCalled();
-      const whiteListButton = mockUserNameWrapper1.children[0].children[1];
+      expect(mockBlackListRemoveOnClick).not.toHaveBeenCalled();
+      const blackListRemoveButton =
+        mockUserNameWrapper1.children[0].children[1];
 
-      expect(mockWhiteListOnClick).not.toHaveBeenCalled();
+      expect(mockBlackListRemoveOnClick).not.toHaveBeenCalled();
+
+      blackListRemoveButton.onclick();
+
+      expect(mockBlackListRemoveOnClick).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("whiteListAdd button", () => {
+    it("should call whiteListAdd with a username and id, on creation", () => {
+      expect.assertions(6);
+
+      expect(mockWhiteListAdd).not.toHaveBeenCalled();
+
+      addButtons();
+
+      expect(mockWhiteListAdd).toHaveBeenCalledTimes(2);
+      expect(mockWhiteListAdd.mock.calls[0][0]).toEqual(mockUserName1);
+      expect(mockWhiteListAdd.mock.calls[0][1]).toEqual(mockUserId1);
+      expect(mockWhiteListAdd.mock.calls[1][0]).toEqual(mockUserName2);
+      expect(mockWhiteListAdd.mock.calls[1][1]).toEqual(mockUserId2);
+    });
+
+    it("should call whiteListAdd onclick", () => {
+      expect.assertions(3);
+
+      expect(mockWhiteListAddOnClick).not.toHaveBeenCalled();
+      const whiteListButton = mockUserNameWrapper1.children[0].children[2];
+
+      expect(mockWhiteListAddOnClick).not.toHaveBeenCalled();
 
       whiteListButton.onclick();
 
-      expect(mockWhiteListOnClick).toHaveBeenCalledTimes(1);
+      expect(mockWhiteListAddOnClick).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("whiteListRemove button", () => {
+    it("should call whiteListRemove with a username and id, on creation", () => {
+      expect.assertions(6);
+
+      expect(mockWhiteListRemove).not.toHaveBeenCalled();
+
+      addButtons();
+
+      expect(mockWhiteListRemove).toHaveBeenCalledTimes(2);
+      expect(mockWhiteListRemove.mock.calls[0][0]).toEqual(mockUserName1);
+      expect(mockWhiteListRemove.mock.calls[0][1]).toEqual(mockUserId1);
+      expect(mockWhiteListRemove.mock.calls[1][0]).toEqual(mockUserName2);
+      expect(mockWhiteListRemove.mock.calls[1][1]).toEqual(mockUserId2);
+    });
+
+    it("should call whiteListRemove onclick", () => {
+      expect.assertions(3);
+
+      expect(mockWhiteListRemoveOnClick).not.toHaveBeenCalled();
+      const whiteListButton = mockUserNameWrapper1.children[0].children[3];
+
+      expect(mockWhiteListRemoveOnClick).not.toHaveBeenCalled();
+
+      whiteListButton.onclick();
+
+      expect(mockWhiteListRemoveOnClick).toHaveBeenCalledTimes(1);
     });
   });
 });

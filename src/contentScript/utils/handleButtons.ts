@@ -1,4 +1,9 @@
-import { blackListUser, whiteListUser } from ".";
+import {
+  blackListAdd,
+  blackListRemove,
+  whiteListAdd,
+  whiteListRemove,
+} from ".";
 
 export const sectionClassName = "i-plus-block-buttons";
 
@@ -14,15 +19,32 @@ export const addButtons = (
       const buttonsDiv = document.createElement("div");
       buttonsDiv.className = sectionClassName;
 
-      const blackListButton = document.createElement("button");
-      blackListButton.textContent = "BL";
-      blackListButton.onclick = blackListUser(userName, userId);
+      const blackListAddButton = document.createElement("button");
+      blackListAddButton.textContent = "BL";
+      blackListAddButton.className = "black-list-add";
+      blackListAddButton.onclick = blackListAdd(userName, userId);
 
-      const whiteListButton = document.createElement("button");
-      whiteListButton.textContent = "WL";
-      whiteListButton.onclick = whiteListUser(userName, userId);
+      const blackListRemoveButton = document.createElement("button");
+      blackListRemoveButton.textContent = "UnBL";
+      blackListRemoveButton.className = "black-list-remove";
+      blackListRemoveButton.onclick = blackListRemove(userName, userId);
 
-      buttonsDiv.append(blackListButton, whiteListButton);
+      const whiteListAddButton = document.createElement("button");
+      whiteListAddButton.textContent = "WL";
+      whiteListAddButton.className = "white-list-add";
+      whiteListAddButton.onclick = whiteListAdd(userName, userId);
+
+      const whiteListRemoveButton = document.createElement("button");
+      whiteListRemoveButton.textContent = "UnWL";
+      whiteListRemoveButton.className = "white-list-remove";
+      whiteListRemoveButton.onclick = whiteListRemove(userName, userId);
+
+      buttonsDiv.append(
+        blackListAddButton,
+        blackListRemoveButton,
+        whiteListAddButton,
+        whiteListRemoveButton
+      );
       userNameElement.parentNode.append(buttonsDiv);
     });
   }

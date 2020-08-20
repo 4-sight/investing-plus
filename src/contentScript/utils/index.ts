@@ -1,3 +1,3 @@
 export * from "./handleButtons";
-export * from "./blackListUser";
-export * from "./whiteListUser";
+export * from "./blackList";
+export * from "./whiteList";

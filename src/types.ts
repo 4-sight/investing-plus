@@ -17,7 +17,9 @@ export enum EventMessage {
   "TOGGLE_HIGHLIGHT_FAVOURITE",
   "SWITCH_BLOCKING",
   "BLACKLIST_ADD",
+  "BLACKLIST_REMOVE",
   "WHITELIST_ADD",
+  "WHITELIST_REMOVE",
 }
 
 export type Message = {

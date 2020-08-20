@@ -201,8 +201,20 @@ export const addToBlackList = (user: User) => {
   }
 };
 
+export const removeFromBlackList = (user: User) => {
+  if (blackList.deleteUser(user.id)) {
+    updatePorts({ sync: "blackList", stylesUpdate: "blackList" });
+  }
+};
+
 export const addToWhiteList = (user: User) => {
   if (whiteList.createUser(user)) {
+    updatePorts({ stylesUpdate: "whiteList", sync: "whiteList" });
+  }
+};
+
+export const removeFromWhiteList = (user: User) => {
+  if (whiteList.deleteUser(user.id)) {
     updatePorts({ stylesUpdate: "whiteList", sync: "whiteList" });
   }
 };

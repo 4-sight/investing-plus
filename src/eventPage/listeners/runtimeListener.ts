@@ -6,7 +6,9 @@ import {
   toggleHighlightFavourite,
   switchBlocking,
   addToBlackList,
+  removeFromBlackList,
   addToWhiteList,
+  removeFromWhiteList,
 } from "../eventPage";
 import { GeneralStore } from "../Classes";
 
@@ -18,7 +20,9 @@ const {
   TOGGLE_HIGHLIGHT_FAVOURITE,
   SWITCH_BLOCKING,
   BLACKLIST_ADD,
+  BLACKLIST_REMOVE,
   WHITELIST_ADD,
+  WHITELIST_REMOVE,
 } = EventMessage;
 
 export const sendRuntimeMessage = (message: {
@@ -66,6 +70,14 @@ export const runtimeListener = (genStore: GeneralStore) => (
 
       case BLACKLIST_ADD:
         addToBlackList(req.payload);
+        break;
+
+      case BLACKLIST_REMOVE:
+        removeFromBlackList(req.payload);
+        break;
+
+      case WHITELIST_REMOVE:
+        removeFromWhiteList(req.payload);
         break;
 
       case WHITELIST_ADD:

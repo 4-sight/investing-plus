@@ -13,7 +13,9 @@ import {
   toggleHighlightFavourite,
   switchBlocking,
   addToBlackList,
+  removeFromBlackList,
   addToWhiteList,
+  removeFromWhiteList,
   addRuntimeListener,
   addStorageListener,
   initializeEventPage,
@@ -806,6 +808,72 @@ describe("eventPage", () => {
     });
   });
 
+  describe("removeFromBlackList", () => {
+    it("should call blackList.deleteUser", () => {
+      expect.assertions(3);
+
+      const deleteUserSpy = jest.spyOn(blackList, "deleteUser");
+      const newUser = { name: "test-user", id: "1234-5" };
+      expect(deleteUserSpy).not.toHaveBeenCalled();
+
+      removeFromBlackList(newUser);
+
+      expect(deleteUserSpy).toHaveBeenCalledTimes(1);
+      expect(deleteUserSpy).toHaveBeenCalledWith(newUser.id);
+    });
+
+    it("should call styles.updateBlackList with blackList users, and general store state (removeFromBlackList)", () => {
+      expect.assertions(3);
+
+      const updateBlackListSpy = jest.spyOn(styles, "updateBlackList");
+      const testUser = { name: "test-user", id: "1234-5" };
+      blackList.createUser(testUser);
+      updateBlackListSpy.mockClear();
+      expect(updateBlackListSpy).not.toHaveBeenCalled();
+
+      removeFromBlackList(testUser);
+
+      expect(updateBlackListSpy).toHaveBeenCalledTimes(1);
+      expect(updateBlackListSpy).toHaveBeenCalledWith(
+        blackList.getUsers(),
+        generalStore.getState()
+      );
+    });
+
+    it("should update the blackList users in chrome storage (removeFromBlackList)", () => {
+      expect.assertions(3);
+
+      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
+
+      const testUser = { name: "test-user", id: "1234-5" };
+      blackList.createUser(testUser);
+
+      removeFromBlackList(testUser);
+
+      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
+      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
+        blackList: blackList.getUsers(),
+      });
+    });
+
+    it("should call portHandlers.updatePorts with the current style rules (removeFromBlackList)", () => {
+      expect.assertions(3);
+
+      const updatePortsSpy = jest.spyOn(portHandlers, "updatePorts");
+      generalStore.set({ enabled: false });
+      updatePortsSpy.mockClear();
+      const testUser = { name: "test-user", id: "1234-5" };
+      blackList.createUser(testUser);
+
+      expect(updatePortsSpy).not.toHaveBeenCalled();
+
+      removeFromBlackList(testUser);
+
+      expect(updatePortsSpy).toHaveBeenCalledTimes(1);
+      expect(updatePortsSpy).toHaveBeenCalledWith(styles.getStyleRules());
+    });
+  });
+
   describe("addToWhiteList", () => {
     it("should call whiteList.createUser", () => {
       expect.assertions(3);
@@ -859,6 +927,72 @@ describe("eventPage", () => {
       expect(updatePortsSpy).not.toHaveBeenCalled();
 
       addToWhiteList({ name: "test-user", id: "1234-5" });
+
+      expect(updatePortsSpy).toHaveBeenCalledTimes(1);
+      expect(updatePortsSpy).toHaveBeenCalledWith(styles.getStyleRules());
+    });
+  });
+
+  describe("removeFromWhiteList", () => {
+    it("should call blackList.deleteUser", () => {
+      expect.assertions(3);
+
+      const deleteUserSpy = jest.spyOn(whiteList, "deleteUser");
+      const newUser = { name: "test-user", id: "1234-5" };
+      expect(deleteUserSpy).not.toHaveBeenCalled();
+
+      removeFromWhiteList(newUser);
+
+      expect(deleteUserSpy).toHaveBeenCalledTimes(1);
+      expect(deleteUserSpy).toHaveBeenCalledWith(newUser.id);
+    });
+
+    it("should call styles.updateBlackList with whiteList users, and general store state (removeFromWhiteList)", () => {
+      expect.assertions(3);
+
+      const updateWhiteListSpy = jest.spyOn(styles, "updateWhiteList");
+      const testUser = { name: "test-user", id: "1234-5" };
+      whiteList.createUser(testUser);
+      updateWhiteListSpy.mockClear();
+      expect(updateWhiteListSpy).not.toHaveBeenCalled();
+
+      removeFromWhiteList(testUser);
+
+      expect(updateWhiteListSpy).toHaveBeenCalledTimes(1);
+      expect(updateWhiteListSpy).toHaveBeenCalledWith(
+        whiteList.getUsers(),
+        generalStore.getState()
+      );
+    });
+
+    it("should update the whiteList users in chrome storage (removeFromWhiteList)", () => {
+      expect.assertions(3);
+
+      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
+
+      const testUser = { name: "test-user", id: "1234-5" };
+      whiteList.createUser(testUser);
+
+      removeFromWhiteList(testUser);
+
+      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
+      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
+        whiteList: whiteList.getUsers(),
+      });
+    });
+
+    it("should call portHandlers.updatePorts with the current style rules (removeFromWhiteList)", () => {
+      expect.assertions(3);
+
+      const updatePortsSpy = jest.spyOn(portHandlers, "updatePorts");
+      generalStore.set({ enabled: false });
+      updatePortsSpy.mockClear();
+      const testUser = { name: "test-user", id: "1234-5" };
+      whiteList.createUser(testUser);
+
+      expect(updatePortsSpy).not.toHaveBeenCalled();
+
+      removeFromWhiteList(testUser);
 
       expect(updatePortsSpy).toHaveBeenCalledTimes(1);
       expect(updatePortsSpy).toHaveBeenCalledWith(styles.getStyleRules());
