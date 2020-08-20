@@ -21,22 +21,26 @@ export const addButtons = (
 
       const blackListAddButton = document.createElement("button");
       blackListAddButton.textContent = "BL";
-      blackListAddButton.className = "black-list-add";
+      blackListAddButton.className = "black-list-add list-add";
+      blackListAddButton.setAttribute("data-user-id", userId);
       blackListAddButton.onclick = blackListAdd(userName, userId);
 
       const blackListRemoveButton = document.createElement("button");
       blackListRemoveButton.textContent = "UnBL";
-      blackListRemoveButton.className = "black-list-remove";
+      blackListRemoveButton.className = "black-list-remove list-remove";
+      blackListRemoveButton.setAttribute("data-user-id", userId);
       blackListRemoveButton.onclick = blackListRemove(userName, userId);
 
       const whiteListAddButton = document.createElement("button");
       whiteListAddButton.textContent = "WL";
-      whiteListAddButton.className = "white-list-add";
+      whiteListAddButton.className = "white-list-add list-add";
+      whiteListAddButton.setAttribute("data-user-id", userId);
       whiteListAddButton.onclick = whiteListAdd(userName, userId);
 
       const whiteListRemoveButton = document.createElement("button");
       whiteListRemoveButton.textContent = "UnWL";
-      whiteListRemoveButton.className = "white-list-remove";
+      whiteListRemoveButton.className = "white-list-remove list-remove";
+      whiteListRemoveButton.setAttribute("data-user-id", userId);
       whiteListRemoveButton.onclick = whiteListRemove(userName, userId);
 
       buttonsDiv.append(

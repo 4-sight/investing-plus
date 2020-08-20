@@ -5,7 +5,13 @@ import {
   User,
   StyleRule,
 } from "../../types";
-import { generateRules } from "../styles";
+import {
+  generateRules,
+  blackListStyles,
+  whiteListStyles,
+  highlightBlockedStyles,
+  highlightFavouriteStyles,
+} from "../styles";
 
 export class Styles {
   private styleMap: StyleMap = new Map();
@@ -24,60 +30,25 @@ export class Styles {
   };
 
   private createBlackListStyles = (blackList: Users) => {
-    this.styleMap.set(
-      StyleRule.BLACKLIST,
-      blackList
-        .reduce(
-          (style: string, user: User) =>
-            style + ` .js-comment[data-user-id="${user.id}"] {display: none;}`,
-          ""
-        )
-        .trim()
-    );
+    this.styleMap.set(StyleRule.BLACKLIST, blackListStyles(blackList));
   };
 
   private createHighlightBlockedStyles = (blackList: Users) => {
     this.styleMap.set(
       StyleRule.HIGHLIGHT_BLOCKED,
-      blackList
-        .reduce(
-          (style: string, user: User) =>
-            style +
-            ` .js-comment[data-user-id="${user.id}"] {border: 2px solid red;}`,
-          ""
-        )
-        .trim()
+      highlightBlockedStyles(blackList)
     );
   };
 
   private createHighlightFavouriteStyles = (whiteList: Users) => {
     this.styleMap.set(
       StyleRule.HIGHLIGHT_FAVOURITE,
-      whiteList
-        .reduce(
-          (style: string, user: User) =>
-            style +
-            ` .js-comment[data-user-id="${user.id}"] {border: 2px solid blue;}`,
-          ""
-        )
-        .trim()
+      highlightFavouriteStyles(whiteList)
     );
   };
 
   private createWhiteListStyles = (whiteList: Users) => {
-    this.styleMap.set(
-      StyleRule.WHITELIST,
-      whiteList.length > 0
-        ? whiteList
-            .reduce(
-              (style: string, user: User) =>
-                style +
-                ` .js-comment[data-user-id="${user.id}"] {display: block;}`,
-              ".js-comment {display: none;}"
-            )
-            .trim()
-        : ""
-    );
+    this.styleMap.set(StyleRule.WHITELIST, whiteListStyles(whiteList));
   };
 
   updateBlackList = (blackList: Users, genState: GeneralStoreState): string => {

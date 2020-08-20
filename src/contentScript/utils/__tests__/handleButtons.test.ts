@@ -40,6 +40,7 @@ class MockDiv {
 class MockButton {
   onClick: (e: MouseEvent) => any = undefined;
   textContent: string = undefined;
+  setAttribute = jest.fn();
 }
 
 class MockElement {

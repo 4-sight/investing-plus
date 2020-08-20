@@ -2,13 +2,36 @@ import { Styles } from "..";
 import { GeneralStore } from "../GeneralStore";
 import { UsersStore } from "../UsersStore";
 import { defaults } from "../../../testHelpers";
-import { generateRules } from "../../styles/generateRules";
+import {
+  blackListStyles,
+  whiteListStyles,
+  highlightBlockedStyles,
+  highlightFavouriteStyles,
+  generateRules,
+} from "../../styles";
 import { StyleRule } from "../../../types";
 
 jest.mock("../../styles/generateRules", () => ({
   generateRules: jest.fn(() => "test-string"),
 }));
+jest.mock("../../styles/blackListStyles", () => ({
+  blackListStyles: jest.fn(() => "test-black-list-styles"),
+}));
+jest.mock("../../styles/whiteListStyles", () => ({
+  whiteListStyles: jest.fn(() => "test-white-list-styles"),
+}));
+jest.mock("../../styles/highlightBlockedStyles", () => ({
+  highlightBlockedStyles: jest.fn(() => "test-highlight-blocked-styles"),
+}));
+jest.mock("../../styles/highlightFavouriteStyles", () => ({
+  highlightFavouriteStyles: jest.fn(() => "test-highlight-favourite-styles"),
+}));
+
 const mockGenerateRules = (generateRules as unknown) as jest.Mock;
+const mockBlackListStyles = (blackListStyles as unknown) as jest.Mock;
+const mockWhiteListStyles = (whiteListStyles as unknown) as jest.Mock;
+const mockHighlightBlockedStyles = (highlightBlockedStyles as unknown) as jest.Mock;
+const mockHighlightFavouriteStyles = (highlightFavouriteStyles as unknown) as jest.Mock;
 
 describe("Styles", () => {
   // Setup
@@ -22,214 +45,123 @@ describe("Styles", () => {
     mockBlackList = new UsersStore("blackList", defaults.userList());
     mockWhiteList = new UsersStore("whiteList", defaults.userList());
     mockGenerateRules.mockClear();
+    mockBlackListStyles.mockClear();
+    mockWhiteListStyles.mockClear();
+    mockHighlightBlockedStyles.mockClear();
+    mockHighlightFavouriteStyles.mockClear();
   });
 
   //=======================================
 
   describe("Method - getStyleRules", () => {
-    it("should call generateRules with a styleMap and return the given string (1)", () => {
-      expect.assertions(5);
+    it("should return the rules from generateRules", () => {
+      expect.assertions(11);
 
+      expect(mockBlackListStyles).not.toHaveBeenCalled();
+      expect(mockWhiteListStyles).not.toHaveBeenCalled();
+      expect(mockHighlightBlockedStyles).not.toHaveBeenCalled();
+      expect(mockHighlightFavouriteStyles).not.toHaveBeenCalled();
       expect(mockGenerateRules).not.toHaveBeenCalled();
 
-      const styles = new Styles(
-        mockGenStore.getState(),
-        [
-          { id: "555-1", name: "test-black-1" },
-          { id: "555-2", name: "test-black-2" },
-          { id: "555-3", name: "test-black-3" },
-        ],
-        [
-          { id: "555-4", name: "test-white-4" },
-          { id: "555-5", name: "test-white-5" },
-          { id: "555-6", name: "test-white-6" },
-        ]
-      );
-      const styleRules = styles.getStyleRules();
-      const expectedStyleMap = new Map();
-      const blackListStyles =
-        '.js-comment[data-user-id="555-1"] {display: none;} .js-comment[data-user-id="555-2"] {display: none;} .js-comment[data-user-id="555-3"] {display: none;}';
-      const whiteListStyles =
-        '.js-comment {display: none;} .js-comment[data-user-id="555-4"] {display: block;} .js-comment[data-user-id="555-5"] {display: block;} .js-comment[data-user-id="555-6"] {display: block;}';
-      const highlightBlockedStyles =
-        '.js-comment[data-user-id="555-1"] {border: 2px solid red;} .js-comment[data-user-id="555-2"] {border: 2px solid red;} .js-comment[data-user-id="555-3"] {border: 2px solid red;}';
-      const highlightFavouriteStyles =
-        '.js-comment[data-user-id="555-4"] {border: 2px solid blue;} .js-comment[data-user-id="555-5"] {border: 2px solid blue;} .js-comment[data-user-id="555-6"] {border: 2px solid blue;}';
-      expectedStyleMap.set(StyleRule.BLACKLIST, blackListStyles);
-      expectedStyleMap.set(StyleRule.WHITELIST, whiteListStyles);
-      expectedStyleMap.set(StyleRule.HIGHLIGHT_BLOCKED, highlightBlockedStyles);
-      expectedStyleMap.set(
-        StyleRule.HIGHLIGHT_FAVOURITE,
-        highlightFavouriteStyles
-      );
+      const styles = new Styles({ ...defaults.generalStore }, [], []);
 
-      expect(typeof styleRules).toBe("string");
-      expect(styleRules).toEqual("test-string");
-
+      expect(mockBlackListStyles).toHaveBeenCalledTimes(1);
+      expect(mockWhiteListStyles).toHaveBeenCalledTimes(1);
+      expect(mockHighlightBlockedStyles).toHaveBeenCalledTimes(1);
+      expect(mockHighlightFavouriteStyles).toHaveBeenCalledTimes(1);
       expect(mockGenerateRules).toHaveBeenCalledTimes(1);
-      expect(mockGenerateRules).toHaveBeenCalledWith(
-        expectedStyleMap,
-        mockGenStore.getState()
-      );
+
+      expect(styles.getStyleRules()).toEqual("test-string");
     });
   });
 
   describe("Method - updateStyles", () => {
-    it("should call generateRules with a styleMap and return the given string (2)", () => {
-      expect.assertions(7);
+    it("should recreate all styleRules and return the given string (2)", () => {
+      expect.assertions(16);
 
+      expect(mockBlackListStyles).not.toHaveBeenCalled();
+      expect(mockWhiteListStyles).not.toHaveBeenCalled();
+      expect(mockHighlightBlockedStyles).not.toHaveBeenCalled();
+      expect(mockHighlightFavouriteStyles).not.toHaveBeenCalled();
       expect(mockGenerateRules).not.toHaveBeenCalled();
-      const styles = new Styles(mockGenStore.getState(), [], []);
+
+      const styles = new Styles({ ...defaults.generalStore }, [], []);
+
+      expect(mockBlackListStyles).toHaveBeenCalledTimes(1);
+      expect(mockWhiteListStyles).toHaveBeenCalledTimes(1);
+      expect(mockHighlightBlockedStyles).toHaveBeenCalledTimes(1);
+      expect(mockHighlightFavouriteStyles).toHaveBeenCalledTimes(1);
       expect(mockGenerateRules).toHaveBeenCalledTimes(1);
-      expect(mockGenerateRules).toHaveBeenCalledWith(
-        new Map([
-          [StyleRule.BLACKLIST, ""],
-          [StyleRule.WHITELIST, ""],
-          [StyleRule.HIGHLIGHT_BLOCKED, ""],
-          [StyleRule.HIGHLIGHT_FAVOURITE, ""],
-        ]),
-        mockGenStore.getState()
-      );
-      const blackList = [
-        { id: "555-1", name: "test-black-1" },
-        { id: "555-2", name: "test-black-2" },
-        { id: "555-3", name: "test-black-3" },
-      ];
 
-      const whiteList = [
-        { id: "555-4", name: "test-white-4" },
-        { id: "555-5", name: "test-white-5" },
-        { id: "555-6", name: "test-white-6" },
-      ];
-
-      const styleRules = styles.updateStyles(
-        mockGenStore.getState(),
-        blackList,
-        whiteList
-      );
-      const expectedStyleMap = new Map();
-      const blackListStyles =
-        '.js-comment[data-user-id="555-1"] {display: none;} .js-comment[data-user-id="555-2"] {display: none;} .js-comment[data-user-id="555-3"] {display: none;}';
-      const whiteListStyles =
-        '.js-comment {display: none;} .js-comment[data-user-id="555-4"] {display: block;} .js-comment[data-user-id="555-5"] {display: block;} .js-comment[data-user-id="555-6"] {display: block;}';
-      const highlightBlockedStyles =
-        '.js-comment[data-user-id="555-1"] {border: 2px solid red;} .js-comment[data-user-id="555-2"] {border: 2px solid red;} .js-comment[data-user-id="555-3"] {border: 2px solid red;}';
-      const highlightFavouriteStyles =
-        '.js-comment[data-user-id="555-4"] {border: 2px solid blue;} .js-comment[data-user-id="555-5"] {border: 2px solid blue;} .js-comment[data-user-id="555-6"] {border: 2px solid blue;}';
-      expectedStyleMap.set(StyleRule.BLACKLIST, blackListStyles);
-      expectedStyleMap.set(StyleRule.WHITELIST, whiteListStyles);
-      expectedStyleMap.set(StyleRule.HIGHLIGHT_BLOCKED, highlightBlockedStyles);
-      expectedStyleMap.set(
-        StyleRule.HIGHLIGHT_FAVOURITE,
-        highlightFavouriteStyles
+      expect(styles.updateStyles({ ...defaults.generalStore }, [], [])).toEqual(
+        "test-string"
       );
 
-      expect(typeof styleRules).toBe("string");
-      expect(styleRules).toEqual("test-string");
-
+      expect(mockBlackListStyles).toHaveBeenCalledTimes(2);
+      expect(mockWhiteListStyles).toHaveBeenCalledTimes(2);
+      expect(mockHighlightBlockedStyles).toHaveBeenCalledTimes(2);
+      expect(mockHighlightFavouriteStyles).toHaveBeenCalledTimes(2);
       expect(mockGenerateRules).toHaveBeenCalledTimes(2);
-      expect(mockGenerateRules).toHaveBeenLastCalledWith(
-        expectedStyleMap,
-        mockGenStore.getState()
-      );
     });
   });
 
   describe("Method - updateBlackList", () => {
-    it("should call generateRules with a styleMap and return the given string (3)", () => {
-      expect.assertions(7);
+    it("should recreate blackList and highlightBlocked styles, return the given string", () => {
+      expect.assertions(16);
 
+      expect(mockBlackListStyles).not.toHaveBeenCalled();
+      expect(mockWhiteListStyles).not.toHaveBeenCalled();
+      expect(mockHighlightBlockedStyles).not.toHaveBeenCalled();
+      expect(mockHighlightFavouriteStyles).not.toHaveBeenCalled();
       expect(mockGenerateRules).not.toHaveBeenCalled();
-      const styles = new Styles(mockGenStore.getState(), [], []);
+
+      const styles = new Styles({ ...defaults.generalStore }, [], []);
+
+      expect(mockBlackListStyles).toHaveBeenCalledTimes(1);
+      expect(mockWhiteListStyles).toHaveBeenCalledTimes(1);
+      expect(mockHighlightBlockedStyles).toHaveBeenCalledTimes(1);
+      expect(mockHighlightFavouriteStyles).toHaveBeenCalledTimes(1);
       expect(mockGenerateRules).toHaveBeenCalledTimes(1);
-      expect(mockGenerateRules).toHaveBeenCalledWith(
-        new Map([
-          [StyleRule.BLACKLIST, ""],
-          [StyleRule.WHITELIST, ""],
-          [StyleRule.HIGHLIGHT_BLOCKED, ""],
-          [StyleRule.HIGHLIGHT_FAVOURITE, ""],
-        ]),
-        mockGenStore.getState()
+
+      expect(styles.updateBlackList([], { ...defaults.generalStore })).toEqual(
+        "test-string"
       );
-      const blackList = [
-        { id: "555-1", name: "test-black-1" },
-        { id: "555-2", name: "test-black-2" },
-        { id: "555-3", name: "test-black-3" },
-      ];
 
-      const styleRules = styles.updateBlackList(
-        blackList,
-        mockGenStore.getState()
-      );
-      const expectedStyleMap = new Map();
-      const blackListStyles =
-        '.js-comment[data-user-id="555-1"] {display: none;} .js-comment[data-user-id="555-2"] {display: none;} .js-comment[data-user-id="555-3"] {display: none;}';
-      const highlightBlockedStyles =
-        '.js-comment[data-user-id="555-1"] {border: 2px solid red;} .js-comment[data-user-id="555-2"] {border: 2px solid red;} .js-comment[data-user-id="555-3"] {border: 2px solid red;}';
-      expectedStyleMap.set(StyleRule.BLACKLIST, blackListStyles);
-      expectedStyleMap.set(StyleRule.WHITELIST, "");
-      expectedStyleMap.set(StyleRule.HIGHLIGHT_BLOCKED, highlightBlockedStyles);
-      expectedStyleMap.set(StyleRule.HIGHLIGHT_FAVOURITE, "");
-
-      expect(typeof styleRules).toBe("string");
-      expect(styleRules).toEqual("test-string");
-
+      expect(mockBlackListStyles).toHaveBeenCalledTimes(2);
+      expect(mockWhiteListStyles).toHaveBeenCalledTimes(1);
+      expect(mockHighlightBlockedStyles).toHaveBeenCalledTimes(2);
+      expect(mockHighlightFavouriteStyles).toHaveBeenCalledTimes(1);
       expect(mockGenerateRules).toHaveBeenCalledTimes(2);
-      expect(mockGenerateRules).toHaveBeenLastCalledWith(
-        expectedStyleMap,
-        mockGenStore.getState()
-      );
     });
   });
 
   describe("Method - updateWhiteList", () => {
-    it("should call generateRules with a styleMap and return the given string (4)", () => {
-      expect.assertions(7);
+    it("should recreate whiteList and highlightFavourite styles, and return the given string", () => {
+      expect.assertions(16);
 
+      expect(mockBlackListStyles).not.toHaveBeenCalled();
+      expect(mockWhiteListStyles).not.toHaveBeenCalled();
+      expect(mockHighlightBlockedStyles).not.toHaveBeenCalled();
+      expect(mockHighlightFavouriteStyles).not.toHaveBeenCalled();
       expect(mockGenerateRules).not.toHaveBeenCalled();
-      const styles = new Styles(mockGenStore.getState(), [], []);
+
+      const styles = new Styles({ ...defaults.generalStore }, [], []);
+
+      expect(mockBlackListStyles).toHaveBeenCalledTimes(1);
+      expect(mockWhiteListStyles).toHaveBeenCalledTimes(1);
+      expect(mockHighlightBlockedStyles).toHaveBeenCalledTimes(1);
+      expect(mockHighlightFavouriteStyles).toHaveBeenCalledTimes(1);
       expect(mockGenerateRules).toHaveBeenCalledTimes(1);
-      expect(mockGenerateRules).toHaveBeenCalledWith(
-        new Map([
-          [StyleRule.BLACKLIST, ""],
-          [StyleRule.WHITELIST, ""],
-          [StyleRule.HIGHLIGHT_BLOCKED, ""],
-          [StyleRule.HIGHLIGHT_FAVOURITE, ""],
-        ]),
-        mockGenStore.getState()
+
+      expect(styles.updateWhiteList([], { ...defaults.generalStore })).toEqual(
+        "test-string"
       );
 
-      const whiteList = [
-        { id: "555-4", name: "test-white-4" },
-        { id: "555-5", name: "test-white-5" },
-        { id: "555-6", name: "test-white-6" },
-      ];
-
-      const styleRules = styles.updateWhiteList(
-        whiteList,
-        mockGenStore.getState()
-      );
-      const expectedStyleMap = new Map();
-      const whiteListStyles =
-        '.js-comment {display: none;} .js-comment[data-user-id="555-4"] {display: block;} .js-comment[data-user-id="555-5"] {display: block;} .js-comment[data-user-id="555-6"] {display: block;}';
-      const highlightFavouriteStyles =
-        '.js-comment[data-user-id="555-4"] {border: 2px solid blue;} .js-comment[data-user-id="555-5"] {border: 2px solid blue;} .js-comment[data-user-id="555-6"] {border: 2px solid blue;}';
-      expectedStyleMap.set(StyleRule.BLACKLIST, "");
-      expectedStyleMap.set(StyleRule.WHITELIST, whiteListStyles);
-      expectedStyleMap.set(StyleRule.HIGHLIGHT_BLOCKED, "");
-      expectedStyleMap.set(
-        StyleRule.HIGHLIGHT_FAVOURITE,
-        highlightFavouriteStyles
-      );
-
-      expect(typeof styleRules).toBe("string");
-      expect(styleRules).toEqual("test-string");
-
+      expect(mockBlackListStyles).toHaveBeenCalledTimes(1);
+      expect(mockWhiteListStyles).toHaveBeenCalledTimes(2);
+      expect(mockHighlightBlockedStyles).toHaveBeenCalledTimes(1);
+      expect(mockHighlightFavouriteStyles).toHaveBeenCalledTimes(2);
       expect(mockGenerateRules).toHaveBeenCalledTimes(2);
-      expect(mockGenerateRules).toHaveBeenLastCalledWith(
-        expectedStyleMap,
-        mockGenStore.getState()
-      );
     });
   });
 });
