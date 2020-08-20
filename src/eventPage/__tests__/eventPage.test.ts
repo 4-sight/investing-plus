@@ -5,9 +5,8 @@ import {
   whiteList,
   styles,
   sendRuntimeMessage,
-  syncBlackList,
-  syncGenStore,
-  syncWhiteList,
+  updateChromeStorage,
+  syncChromeStorage,
   linkToContentScript,
   toggleEnabled,
   toggleHighlightBlocked,
@@ -19,10 +18,11 @@ import {
   addStorageListener,
   initializeEventPage,
   updateStyles,
+  updatePorts,
   portHandlers,
 } from "../eventPage";
-import * as evenPageFunctions from "../eventPage";
-import { EventMessage, Blocking } from "../../types";
+import * as eventPageFunctions from "../eventPage";
+import { EventMessage, Blocking, GeneralStoreState, Users } from "../../types";
 import { defaults } from "../../testHelpers";
 import * as PortHandlerModule from "../Classes/PortHandler";
 import * as runtimeListenerModule from "../listeners/runtimeListener";
@@ -94,74 +94,76 @@ describe("eventPage", () => {
     });
   });
 
-  describe("syncGenStore", () => {
-    it("should call storage.sync.set with the current general store state", () => {
-      expect.assertions(5);
+  describe("updateChromeStorage", () => {
+    describe('store: "genStore"', () => {
+      it("should call storage.sync.set with the current general store state", () => {
+        expect.assertions(5);
 
-      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
+        expect(chrome.storage.sync.set).not.toHaveBeenCalled();
 
-      const newStore = { ...defaults.generalStore, enabled: false };
-      syncGenStore();
+        const newStore = { ...defaults.generalStore, enabled: false };
+        updateChromeStorage("genStore");
 
-      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
-      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
-        generalStore: generalStore.getState(),
-      });
+        expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
+        expect(chrome.storage.sync.set).toHaveBeenCalledWith({
+          generalStore: generalStore.getState(),
+        });
 
-      generalStore.setState(newStore);
-      syncGenStore();
+        generalStore.setState(newStore);
+        updateChromeStorage("genStore");
 
-      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(2);
-      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
-        generalStore: newStore,
-      });
-    });
-  });
-
-  describe("syncBlackList", () => {
-    it("should call storage.sync.set with the current blackList users", () => {
-      expect.assertions(5);
-
-      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
-
-      const newBlackList = [...defaults.userList()];
-      syncBlackList();
-
-      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
-      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
-        blackList: [],
-      });
-
-      blackList.updateList(newBlackList);
-      syncBlackList();
-
-      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(2);
-      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
-        blackList: newBlackList,
+        expect(chrome.storage.sync.set).toHaveBeenCalledTimes(2);
+        expect(chrome.storage.sync.set).toHaveBeenCalledWith({
+          generalStore: newStore,
+        });
       });
     });
-  });
 
-  describe("syncWhiteList", () => {
-    it("should call storage.sync.set with the current whiteList users", () => {
-      expect.assertions(5);
+    describe('store: "blackList', () => {
+      it("should call storage.sync.set with the current blackList users", () => {
+        expect.assertions(5);
 
-      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
+        expect(chrome.storage.sync.set).not.toHaveBeenCalled();
 
-      const newWhiteList = [...defaults.userList()];
-      syncWhiteList();
+        const newBlackList = [...defaults.userList()];
+        updateChromeStorage("blackList");
 
-      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
-      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
-        whiteList: [],
+        expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
+        expect(chrome.storage.sync.set).toHaveBeenCalledWith({
+          blackList: [],
+        });
+
+        blackList.updateList(newBlackList);
+        updateChromeStorage("blackList");
+
+        expect(chrome.storage.sync.set).toHaveBeenCalledTimes(2);
+        expect(chrome.storage.sync.set).toHaveBeenCalledWith({
+          blackList: newBlackList,
+        });
       });
+    });
 
-      whiteList.updateList(newWhiteList);
-      syncWhiteList();
+    describe('store: "whiteList"', () => {
+      it("should call storage.sync.set with the current whiteList users", () => {
+        expect.assertions(5);
 
-      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(2);
-      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
-        whiteList: newWhiteList,
+        expect(chrome.storage.sync.set).not.toHaveBeenCalled();
+
+        const newWhiteList = [...defaults.userList()];
+        updateChromeStorage("whiteList");
+
+        expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
+        expect(chrome.storage.sync.set).toHaveBeenCalledWith({
+          whiteList: [],
+        });
+
+        whiteList.updateList(newWhiteList);
+        updateChromeStorage("whiteList");
+
+        expect(chrome.storage.sync.set).toHaveBeenCalledTimes(2);
+        expect(chrome.storage.sync.set).toHaveBeenCalledWith({
+          whiteList: newWhiteList,
+        });
       });
     });
   });
@@ -181,6 +183,204 @@ describe("eventPage", () => {
         blackList.getUsers(),
         whiteList.getUsers()
       );
+    });
+  });
+
+  describe("updatePorts", () => {
+    it("should call updateChromeStorage if options.sync is given", () => {
+      expect.assertions(3);
+
+      const updateChromeStorageSpy = jest.spyOn(
+        eventPageFunctions,
+        "updateChromeStorage"
+      );
+      const storeName = "blackList";
+
+      expect(updateChromeStorageSpy).not.toHaveBeenCalled();
+
+      updatePorts({ sync: storeName });
+
+      expect(updateChromeStorageSpy).toHaveBeenCalledTimes(1);
+      expect(updateChromeStorageSpy).toHaveBeenCalledWith(storeName);
+    });
+
+    it('should call updateStyles if options.stylesUpdate = "all"', () => {
+      expect.assertions(2);
+
+      const updateStylesSpy = jest.spyOn(eventPageFunctions, "updateStyles");
+
+      expect(updateStylesSpy).not.toHaveBeenCalled();
+
+      updatePorts({ stylesUpdate: "all" });
+
+      expect(updateStylesSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call styles.updateBlackList if options.stylesUpdate = "blackList"', () => {
+      expect.assertions(3);
+
+      const updateBlackListSpy = jest.spyOn(styles, "updateBlackList");
+
+      expect(updateBlackListSpy).not.toHaveBeenCalled();
+
+      updatePorts({ stylesUpdate: "blackList" });
+
+      expect(updateBlackListSpy).toHaveBeenCalledTimes(1);
+      expect(updateBlackListSpy).toHaveBeenCalledWith(
+        blackList.getUsers(),
+        generalStore.getState()
+      );
+    });
+
+    it('should call styles.updateWhiteList if options.stylesUpdate = "whiteList"', () => {
+      expect.assertions(3);
+
+      const updateWhiteListSpy = jest.spyOn(styles, "updateWhiteList");
+
+      expect(updateWhiteListSpy).not.toHaveBeenCalled();
+
+      updatePorts({ stylesUpdate: "whiteList" });
+
+      expect(updateWhiteListSpy).toHaveBeenCalledTimes(1);
+      expect(updateWhiteListSpy).toHaveBeenCalledWith(
+        whiteList.getUsers(),
+        generalStore.getState()
+      );
+    });
+  });
+
+  describe("syncChromeStorage", () => {
+    it("should call chrome.storage.sync.get with all stores", () => {
+      expect.assertions(3);
+
+      expect(chrome.storage.sync.get).not.toHaveBeenCalled();
+
+      syncChromeStorage();
+
+      expect(chrome.storage.sync.get).toHaveBeenCalledTimes(1);
+      expect(chrome.storage.sync.get.mock.calls[0][0]).toEqual([
+        "generalStore",
+        "blackList",
+        "whiteList",
+      ]);
+    });
+
+    it("should set the respective store states if given", () => {
+      expect.assertions(9);
+
+      const genStoreSpy = jest.spyOn(generalStore, "setState");
+      genStoreSpy.mockClear();
+      const blackListSpy = jest.spyOn(blackList, "updateList");
+      blackListSpy.mockClear();
+      const whiteListSpy = jest.spyOn(whiteList, "updateList");
+      whiteListSpy.mockClear();
+
+      const mockGenStoreState: GeneralStoreState = {
+        ...defaults.generalStore,
+        enabled: false,
+        blocking: Blocking.WHITELIST,
+      };
+      const mockBlackListUsers: Users = [
+        { name: "test-user-1", id: "test-id-1" },
+      ];
+      const mockWhiteListUsers: Users = [
+        { name: "test-user-2", id: "test-id-2" },
+      ];
+
+      chrome.storage.sync.get.mockImplementationOnce((keys: string[], cb) => {
+        cb({
+          generalStore: mockGenStoreState,
+          blackList: mockBlackListUsers,
+          whiteList: mockWhiteListUsers,
+        });
+      });
+
+      expect(genStoreSpy).not.toHaveBeenCalled();
+      expect(blackListSpy).not.toHaveBeenCalled();
+      expect(whiteListSpy).not.toHaveBeenCalled();
+
+      syncChromeStorage();
+
+      expect(genStoreSpy).toHaveBeenCalledTimes(1);
+      expect(genStoreSpy).toHaveBeenCalledWith(mockGenStoreState);
+
+      expect(blackListSpy).toHaveBeenCalledTimes(1);
+      expect(blackListSpy).toHaveBeenCalledWith(mockBlackListUsers);
+
+      expect(whiteListSpy).toHaveBeenCalledTimes(1);
+      expect(whiteListSpy).toHaveBeenCalledWith(mockWhiteListUsers);
+    });
+
+    it("should call updatePorts for each store received", () => {
+      expect.assertions(7);
+
+      const updatePortsSpy = jest.spyOn(eventPageFunctions, "updatePorts");
+      updatePortsSpy.mockClear();
+
+      const mockGenStoreState: GeneralStoreState = {
+        ...defaults.generalStore,
+        enabled: false,
+        blocking: Blocking.WHITELIST,
+      };
+      const mockBlackListUsers: Users = [
+        { name: "test-user-1", id: "test-id-1" },
+      ];
+      const mockWhiteListUsers: Users = [
+        { name: "test-user-2", id: "test-id-2" },
+      ];
+
+      chrome.storage.sync.get.mockImplementationOnce((keys: string[], cb) => {
+        cb({
+          generalStore: mockGenStoreState,
+          blackList: mockBlackListUsers,
+          whiteList: mockWhiteListUsers,
+        });
+      });
+
+      syncChromeStorage();
+
+      expect(updatePortsSpy).toHaveBeenCalledTimes(3);
+      expect(updatePortsSpy).toHaveBeenCalledWith({ stylesUpdate: "all" });
+      expect(updatePortsSpy).toHaveBeenCalledWith({
+        stylesUpdate: "blackList",
+      });
+      expect(updatePortsSpy).toHaveBeenCalledWith({
+        stylesUpdate: "whiteList",
+      });
+
+      updatePortsSpy.mockClear();
+      chrome.storage.sync.get.mockImplementationOnce((keys: string[], cb) => {
+        cb({
+          generalStore: mockGenStoreState,
+          blackList: mockBlackListUsers,
+        });
+      });
+
+      syncChromeStorage();
+
+      expect(updatePortsSpy).toHaveBeenCalledTimes(2);
+      expect(updatePortsSpy).toHaveBeenCalledWith({ stylesUpdate: "all" });
+      expect(updatePortsSpy).toHaveBeenCalledWith({
+        stylesUpdate: "blackList",
+      });
+    });
+
+    it("should call chrome.storage.sync.set with the respective stores if missing in storage", () => {
+      expect.assertions(3);
+
+      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
+
+      chrome.storage.sync.get.mockImplementationOnce((keys: string[], cb) => {
+        cb({});
+      });
+      syncChromeStorage();
+
+      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
+      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
+        generalStore: generalStore.getState(),
+        blackList: blackList.getUsers(),
+        whiteList: whiteList.getUsers(),
+      });
     });
   });
 
@@ -565,6 +765,7 @@ describe("eventPage", () => {
       expect.assertions(3);
 
       const updateBlackListSpy = jest.spyOn(styles, "updateBlackList");
+      updateBlackListSpy.mockClear();
       expect(updateBlackListSpy).not.toHaveBeenCalled();
 
       addToBlackList({ name: "test-user", id: "1234-5" });
@@ -623,6 +824,7 @@ describe("eventPage", () => {
       expect.assertions(3);
 
       const updateWhiteListSpy = jest.spyOn(styles, "updateWhiteList");
+      updateWhiteListSpy.mockClear();
       expect(updateWhiteListSpy).not.toHaveBeenCalled();
 
       addToWhiteList({ name: "test-user", id: "1234-5" });
@@ -736,19 +938,32 @@ describe("eventPage", () => {
   });
 
   describe("initializeEventPage", () => {
-    it("should call addRuntimeListener, and addStorageListener", () => {
-      expect.assertions(4);
+    it("should call addRuntimeListener, addStorageListener, and syncChromeStorage", () => {
+      expect.assertions(6);
 
-      const addRuntimeSpy = jest.spyOn(evenPageFunctions, "addRuntimeListener");
-      const addStorageSpy = jest.spyOn(evenPageFunctions, "addStorageListener");
+      const addRuntimeSpy = jest.spyOn(
+        eventPageFunctions,
+        "addRuntimeListener"
+      );
+      const addStorageSpy = jest.spyOn(
+        eventPageFunctions,
+        "addStorageListener"
+      );
+
+      const syncChromeStorageSpy = jest.spyOn(
+        eventPageFunctions,
+        "syncChromeStorage"
+      );
 
       expect(addRuntimeSpy).not.toHaveBeenCalled();
       expect(addStorageSpy).not.toHaveBeenCalled();
+      expect(syncChromeStorageSpy).not.toHaveBeenCalled();
 
       initializeEventPage();
 
       expect(addRuntimeSpy).toHaveBeenCalledTimes(1);
       expect(addStorageSpy).toHaveBeenCalledTimes(1);
+      expect(syncChromeStorageSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

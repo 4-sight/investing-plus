@@ -47,7 +47,8 @@ export type GeneralStoreState = {
   highlightBlocked: boolean;
 };
 
-// export type StoreDispatch = (payload: Partial<StoreState>) => void;
+export type ListName = "blackList" | "whiteList";
+export type StoreName = ListName | "genStore";
 
 export enum ScriptCommand {
   "INITIALIZE",
@@ -66,3 +67,8 @@ export enum StyleRule {
 export type StyleMap = Map<StyleRule, string>;
 
 export type PortMap = Map<number, PortHandler>;
+
+export type UpdatePorts = (options?: {
+  sync?: StoreName;
+  stylesUpdate?: "all" | ListName;
+}) => void;

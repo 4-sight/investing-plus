@@ -21,44 +21,6 @@ describe("GeneralStore", () => {
     expect(g).toBeInstanceOf(GeneralStore);
   });
 
-  it("should call chrome.storage.sync.get and set the store state if given", () => {
-    expect.assertions(4);
-
-    const mockSyncStore: GeneralStoreState = {
-      ...defaults.generalStore,
-      enabled: false,
-      blocking: Blocking.WHITELIST,
-    };
-    chrome.storage.sync.get.mockImplementationOnce((keys: string[], cb) => {
-      cb({ [keys[0]]: mockSyncStore });
-    });
-    expect(chrome.storage.sync.get).not.toHaveBeenCalled();
-
-    const store = new GeneralStore(defaults.generalStore);
-    expect(chrome.storage.sync.get).toHaveBeenCalledTimes(1);
-    expect(chrome.storage.sync.get.mock.calls[0][0]).toEqual(["generalStore"]);
-    expect(store.getState()).toEqual(mockSyncStore);
-  });
-
-  it("should call chrome.storage.sync.set if there is no generalStore in storage", () => {
-    expect.assertions(6);
-
-    chrome.storage.sync.get.mockImplementationOnce((keys: string[], cb) => {
-      cb({});
-    });
-    expect(chrome.storage.sync.get).not.toHaveBeenCalled();
-    expect(chrome.storage.sync.set).not.toHaveBeenCalled();
-
-    new GeneralStore(defaults.generalStore);
-    expect(chrome.storage.sync.get).toHaveBeenCalledTimes(1);
-    expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
-
-    expect(chrome.storage.sync.get.mock.calls[0][0]).toEqual(["generalStore"]);
-    expect(chrome.storage.sync.set.mock.calls[0][0]).toEqual({
-      generalStore: { ...defaults.generalStore },
-    });
-  });
-
   it("should contain a valid store state", () => {
     expect.assertions(5);
 

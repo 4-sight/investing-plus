@@ -27,8 +27,13 @@ export const syncListener = (
           payload: genStore.getState(),
         });
 
-        // Blocking state changed
-        if (oldStore.blocking !== newValue.generalStore.blocking) {
+        // Non-enabled state changed
+        if (
+          !deepEqual(
+            { ...oldStore, enabled: "blank" },
+            { ...newValue.generalStore, enabled: "blank" }
+          )
+        ) {
           portHandlerStore.updatePorts(
             styles.updateStyles(
               genStore.getState(),

@@ -12,14 +12,6 @@ export class GeneralStore {
     this.state = sanitizer(state);
     this.sanitizeState = sanitizer;
     this.changes = {};
-
-    chrome.storage.sync.get(["generalStore"], (res) => {
-      if ("generalStore" in res) {
-        this.state = sanitizer(res.generalStore);
-      } else {
-        chrome.storage.sync.set({ generalStore: { ...this.state } });
-      }
-    });
   }
 
   getState = (): GeneralStoreState => ({ ...this.state });

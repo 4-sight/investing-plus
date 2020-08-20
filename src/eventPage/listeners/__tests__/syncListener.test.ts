@@ -23,8 +23,8 @@ describe("syncListener", () => {
 
   beforeEach(() => {
     mockGenStore = new GeneralStore(defaults.generalStore);
-    mockBlackList = new UsersStore("test-blackList", defaults.userList());
-    mockWhiteList = new UsersStore("test-whiteList", defaults.userList());
+    mockBlackList = new UsersStore("blackList", defaults.userList());
+    mockWhiteList = new UsersStore("whiteList", defaults.userList());
     mockStyles = new Styles(
       mockGenStore.getState(),
       mockBlackList.getUsers(),
@@ -100,13 +100,21 @@ describe("syncListener", () => {
       });
     });
 
-    describe("if blocking has changed", () => {
+    describe("if any field other than 'enabled' has changed", () => {
       it("should call styles.updateStyles", () => {
-        expect.assertions(3);
+        expect.assertions(5);
 
-        const newStore = {
+        const newStore1 = {
           ...defaults.generalStore,
           blocking: Blocking.WHITELIST,
+        };
+        const newStore2 = {
+          ...defaults.generalStore,
+          highlightBlocked: true,
+        };
+        const newStore3 = {
+          ...defaults.generalStore,
+          highlightFavourite: true,
         };
         const stylesSpy = jest.spyOn(mockStyles, "updateStyles");
 
@@ -114,7 +122,7 @@ describe("syncListener", () => {
 
         listener({
           newValue: {
-            generalStore: newStore,
+            generalStore: newStore1,
           },
         });
 
@@ -124,6 +132,26 @@ describe("syncListener", () => {
           mockBlackList.getUsers(),
           mockWhiteList.getUsers()
         );
+
+        stylesSpy.mockClear();
+
+        listener({
+          newValue: {
+            generalStore: newStore2,
+          },
+        });
+
+        expect(stylesSpy).toHaveBeenCalledTimes(1);
+
+        stylesSpy.mockClear();
+
+        listener({
+          newValue: {
+            generalStore: newStore3,
+          },
+        });
+
+        expect(stylesSpy).toHaveBeenCalledTimes(1);
       });
 
       it("should call portHandlerStore.updatePorts, with the new styleRules", () => {

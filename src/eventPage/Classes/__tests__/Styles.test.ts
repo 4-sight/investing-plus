@@ -19,8 +19,8 @@ describe("Styles", () => {
 
   beforeEach(() => {
     mockGenStore = new GeneralStore(defaults.generalStore);
-    mockBlackList = new UsersStore("test-blackList", defaults.userList());
-    mockWhiteList = new UsersStore("test-whiteList", defaults.userList());
+    mockBlackList = new UsersStore("blackList", defaults.userList());
+    mockWhiteList = new UsersStore("whiteList", defaults.userList());
     mockGenerateRules.mockClear();
   });
 

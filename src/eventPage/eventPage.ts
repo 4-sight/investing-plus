@@ -7,7 +7,15 @@ import {
 } from "./Classes";
 import { defaultStores } from "../constants";
 import { runtimeListener, syncListener } from "./listeners";
-import { EventMessage, Blocking, User } from "../types";
+import {
+  EventMessage,
+  Blocking,
+  User,
+  UpdatePorts,
+  StoreName,
+  GeneralStoreState,
+  Users,
+} from "../types";
 
 export const generalStore = new GeneralStore(defaultStores.generalStore());
 export const blackList = new UsersStore("blackList");
@@ -28,16 +36,20 @@ export const sendRuntimeMessage = (message: {
   chrome.runtime.sendMessage(message);
 };
 
-export const syncGenStore = () => {
-  chrome.storage.sync.set({ generalStore: generalStore.getState() });
-};
+export const updateChromeStorage = (store: StoreName) => {
+  switch (store) {
+    case "genStore":
+      chrome.storage.sync.set({ generalStore: generalStore.getState() });
+      break;
 
-export const syncBlackList = () => {
-  chrome.storage.sync.set({ blackList: blackList.getUsers() });
-};
+    case "blackList":
+      chrome.storage.sync.set({ blackList: blackList.getUsers() });
+      break;
 
-export const syncWhiteList = () => {
-  chrome.storage.sync.set({ whiteList: whiteList.getUsers() });
+    case "whiteList":
+      chrome.storage.sync.set({ whiteList: whiteList.getUsers() });
+      break;
+  }
 };
 
 export const updateStyles = () => {
@@ -48,10 +60,82 @@ export const updateStyles = () => {
   );
 };
 
+export const updatePorts: UpdatePorts = (options) => {
+  const { sync, stylesUpdate } = options;
+
+  if (sync) {
+    updateChromeStorage(sync);
+  }
+
+  switch (stylesUpdate) {
+    case "all":
+      updateStyles();
+      break;
+
+    case "blackList":
+      styles.updateBlackList(blackList.getUsers(), generalStore.getState());
+      break;
+
+    case "whiteList":
+      styles.updateWhiteList(whiteList.getUsers(), generalStore.getState());
+      break;
+  }
+
+  portHandlers.updatePorts(styles.getStyleRules());
+};
+
+export const syncChromeStorage = () => {
+  chrome.storage.sync.get(["generalStore", "blackList", "whiteList"], (res) => {
+    let set = false;
+    const outbound: {
+      generalStore?: GeneralStoreState;
+      blackList?: Users;
+      whiteList?: Users;
+    } = {};
+
+    if ("generalStore" in res) {
+      generalStore.setState(res.generalStore);
+      updatePorts({ stylesUpdate: "all" });
+    } else {
+      outbound.generalStore = generalStore.getState();
+      set = true;
+    }
+
+    if ("blackList" in res) {
+      if (blackList.updateList(res.blackList)) {
+        updatePorts({ stylesUpdate: "blackList" });
+      } else {
+        outbound.blackList = blackList.getUsers();
+        set = true;
+      }
+    } else {
+      outbound.blackList = blackList.getUsers();
+      set = true;
+    }
+
+    if ("whiteList" in res) {
+      if (whiteList.updateList(res.whiteList)) {
+        updatePorts({ stylesUpdate: "whiteList" });
+      } else {
+        outbound.whiteList = whiteList.getUsers();
+        set = true;
+      }
+    } else {
+      outbound.whiteList = whiteList.getUsers();
+      set = true;
+    }
+
+    if (set) {
+      chrome.storage.sync.set(outbound);
+    }
+  });
+};
+
 //===============================================
 //Actions========================================
 
 export const linkToContentScript = (tab: chrome.tabs.Tab) => {
+  console.log("LINK, styles: ", styles.getStyleRules());
   const portHandler = new PortHandler(tab, portHandlers.removePort(tab.id));
   portHandler.initialize(styles.getStyleRules(), generalStore.get("enabled"));
   portHandlers.addPort(tab.id, portHandler);
@@ -65,7 +149,7 @@ export const toggleEnabled = () => {
     payload: generalStore.getState(),
   });
 
-  syncGenStore();
+  updateChromeStorage("genStore");
 
   generalStore.get("enabled")
     ? portHandlers.enablePorts()
@@ -80,9 +164,7 @@ export const toggleHighlightBlocked = () => {
     payload: generalStore.getState(),
   });
 
-  syncGenStore();
-  updateStyles();
-  portHandlers.updatePorts(styles.getStyleRules());
+  updatePorts({ sync: "genStore", stylesUpdate: "all" });
 };
 
 export const toggleHighlightFavourite = () => {
@@ -95,9 +177,7 @@ export const toggleHighlightFavourite = () => {
     payload: generalStore.getState(),
   });
 
-  syncGenStore();
-  updateStyles();
-  portHandlers.updatePorts(styles.getStyleRules());
+  updatePorts({ sync: "genStore", stylesUpdate: "all" });
 };
 
 export const switchBlocking = () => {
@@ -112,24 +192,18 @@ export const switchBlocking = () => {
     payload: generalStore.getState(),
   });
 
-  syncGenStore();
-  updateStyles();
-  portHandlers.updatePorts(styles.getStyleRules());
+  updatePorts({ sync: "genStore", stylesUpdate: "all" });
 };
 
 export const addToBlackList = (user: User) => {
   if (blackList.createUser(user)) {
-    styles.updateBlackList(blackList.getUsers(), generalStore.getState());
-    syncBlackList();
-    portHandlers.updatePorts(styles.getStyleRules());
+    updatePorts({ sync: "blackList", stylesUpdate: "blackList" });
   }
 };
 
 export const addToWhiteList = (user: User) => {
   if (whiteList.createUser(user)) {
-    styles.updateWhiteList(whiteList.getUsers(), generalStore.getState());
-    syncWhiteList();
-    portHandlers.updatePorts(styles.getStyleRules());
+    updatePorts({ stylesUpdate: "whiteList", sync: "whiteList" });
   }
 };
 
@@ -151,4 +225,5 @@ export const addStorageListener = () => {
 export const initializeEventPage = () => {
   addRuntimeListener();
   addStorageListener();
+  syncChromeStorage();
 };

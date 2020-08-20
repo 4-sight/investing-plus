@@ -1,10 +1,10 @@
-import { User, Users, UserMap, UserIds } from "../../types";
+import { User, Users, UserMap, UserIds, ListName } from "../../types";
 
 export class UsersStore {
   private users: UserMap;
   private exampleUser: User;
 
-  constructor(storeName: string, users?: Users) {
+  constructor(storeName: ListName, users?: Users) {
     this.exampleUser = { id: "example", name: "example" };
 
     if (users) {
@@ -17,19 +17,6 @@ export class UsersStore {
     } else {
       this.users = new Map();
     }
-
-    chrome.storage.sync.get([storeName], (res) => {
-      if (storeName in res) {
-        const sanitized = this.sanitizer(res[storeName]);
-        if (sanitized) {
-          this.users = new Map(sanitized.map((u) => [u.id, u]));
-        } else {
-          chrome.storage.sync.set({ [storeName]: [...this.getUsers()] });
-        }
-      } else {
-        chrome.storage.sync.set({ [storeName]: [...this.getUsers()] });
-      }
-    });
   }
 
   private sanitizer = (users: any): Users | undefined => {
@@ -93,10 +80,13 @@ export class UsersStore {
     return false;
   };
 
-  updateList = (users: Users) => {
+  updateList = (users: Users): boolean => {
     const sanitized = this.sanitizer(users);
     if (sanitized) {
       this.users = new Map(sanitized.map((u) => [u.id, u]));
+      return true;
     }
+
+    return false;
   };
 }
