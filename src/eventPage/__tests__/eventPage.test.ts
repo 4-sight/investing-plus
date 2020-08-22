@@ -14,8 +14,12 @@ import {
   switchBlocking,
   addToBlackList,
   removeFromBlackList,
+  updateBlackListUser,
+  switchBlackListUser,
   addToWhiteList,
   removeFromWhiteList,
+  updateWhiteListUser,
+  switchWhiteListUser,
   addRuntimeListener,
   addStorageListener,
   initializeEventPage,
@@ -97,14 +101,42 @@ describe("eventPage", () => {
   });
 
   describe("updateChromeStorage", () => {
-    describe('store: "genStore"', () => {
+    it("should call storage.sync.set for each store in stores", () => {
+      expect.assertions(5);
+
+      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
+
+      updateChromeStorage([]);
+
+      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
+
+      chrome.storage.sync.set.mockClear();
+
+      updateChromeStorage(["blackList"]);
+
+      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
+
+      chrome.storage.sync.set.mockClear();
+
+      updateChromeStorage(["blackList", "whiteList"]);
+
+      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(2);
+
+      chrome.storage.sync.set.mockClear();
+
+      updateChromeStorage(["genStore", "blackList", "whiteList"]);
+
+      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(3);
+    });
+
+    describe('stores contains "genStore"', () => {
       it("should call storage.sync.set with the current general store state", () => {
         expect.assertions(5);
 
         expect(chrome.storage.sync.set).not.toHaveBeenCalled();
 
         const newStore = { ...defaults.generalStore, enabled: false };
-        updateChromeStorage("genStore");
+        updateChromeStorage(["genStore"]);
 
         expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
         expect(chrome.storage.sync.set).toHaveBeenCalledWith({
@@ -112,7 +144,7 @@ describe("eventPage", () => {
         });
 
         generalStore.setState(newStore);
-        updateChromeStorage("genStore");
+        updateChromeStorage(["genStore"]);
 
         expect(chrome.storage.sync.set).toHaveBeenCalledTimes(2);
         expect(chrome.storage.sync.set).toHaveBeenCalledWith({
@@ -121,14 +153,14 @@ describe("eventPage", () => {
       });
     });
 
-    describe('store: "blackList', () => {
+    describe('stores contains "blackList', () => {
       it("should call storage.sync.set with the current blackList users", () => {
         expect.assertions(5);
 
         expect(chrome.storage.sync.set).not.toHaveBeenCalled();
 
         const newBlackList = [...defaults.userList()];
-        updateChromeStorage("blackList");
+        updateChromeStorage(["blackList"]);
 
         expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
         expect(chrome.storage.sync.set).toHaveBeenCalledWith({
@@ -136,7 +168,7 @@ describe("eventPage", () => {
         });
 
         blackList.updateList(newBlackList);
-        updateChromeStorage("blackList");
+        updateChromeStorage(["blackList"]);
 
         expect(chrome.storage.sync.set).toHaveBeenCalledTimes(2);
         expect(chrome.storage.sync.set).toHaveBeenCalledWith({
@@ -145,14 +177,14 @@ describe("eventPage", () => {
       });
     });
 
-    describe('store: "whiteList"', () => {
+    describe('stores contains "whiteList"', () => {
       it("should call storage.sync.set with the current whiteList users", () => {
         expect.assertions(5);
 
         expect(chrome.storage.sync.set).not.toHaveBeenCalled();
 
         const newWhiteList = [...defaults.userList()];
-        updateChromeStorage("whiteList");
+        updateChromeStorage(["whiteList"]);
 
         expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
         expect(chrome.storage.sync.set).toHaveBeenCalledWith({
@@ -160,7 +192,7 @@ describe("eventPage", () => {
         });
 
         whiteList.updateList(newWhiteList);
-        updateChromeStorage("whiteList");
+        updateChromeStorage(["whiteList"]);
 
         expect(chrome.storage.sync.set).toHaveBeenCalledTimes(2);
         expect(chrome.storage.sync.set).toHaveBeenCalledWith({
@@ -200,10 +232,10 @@ describe("eventPage", () => {
 
       expect(updateChromeStorageSpy).not.toHaveBeenCalled();
 
-      updatePorts({ sync: storeName });
+      updatePorts({ sync: [storeName] });
 
       expect(updateChromeStorageSpy).toHaveBeenCalledTimes(1);
-      expect(updateChromeStorageSpy).toHaveBeenCalledWith(storeName);
+      expect(updateChromeStorageSpy).toHaveBeenCalledWith([storeName]);
     });
 
     it('should call updateStyles if options.stylesUpdate = "all"', () => {
@@ -520,7 +552,7 @@ describe("eventPage", () => {
       });
     });
 
-    it("should call runtime.sendMessage with GEN_STORE_UPDATED and current gen store state", () => {
+    it("should call runtime.sendMessage with GEN_STORE_UPDATED and current gen store state (toggleHighlightBlocked)", () => {
       expect.assertions(3);
 
       expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
@@ -534,7 +566,7 @@ describe("eventPage", () => {
       });
     });
 
-    it("should update the general store state in chrome storage", () => {
+    it("should update the general store state in chrome storage (toggleHighlightBlocked)", () => {
       expect.assertions(3);
 
       expect(chrome.storage.sync.set).not.toHaveBeenCalled();
@@ -547,7 +579,7 @@ describe("eventPage", () => {
       });
     });
 
-    it("should call styles.updateStyles with genStore state, blackList users and whiteList user ", () => {
+    it("should call styles.updateStyles with genStore state, blackList users and whiteList user (toggleHighlightBlocked)", () => {
       expect.assertions(3);
 
       const styleSpy = jest.spyOn(styles, "updateStyles");
@@ -564,7 +596,7 @@ describe("eventPage", () => {
       );
     });
 
-    it("should call portHandlers.updatePorts with the current style rules", () => {
+    it("should call portHandlers.updatePorts with the current style rules (toggleHighlightBlocked)", () => {
       expect.assertions(3);
 
       const updatePortsSpy = jest.spyOn(portHandlers, "updatePorts");
@@ -596,7 +628,7 @@ describe("eventPage", () => {
       });
     });
 
-    it("should call runtime.sendMessage with GEN_STORE_UPDATED and current gen store state", () => {
+    it("should call runtime.sendMessage with GEN_STORE_UPDATED and current gen store state (toggleHighlightFavourite)", () => {
       expect.assertions(3);
 
       expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
@@ -610,7 +642,7 @@ describe("eventPage", () => {
       });
     });
 
-    it("should update the general store state in chrome storage", () => {
+    it("should update the general store state in chrome storage (toggleHighlightFavourite)", () => {
       expect.assertions(3);
 
       expect(chrome.storage.sync.set).not.toHaveBeenCalled();
@@ -623,7 +655,7 @@ describe("eventPage", () => {
       });
     });
 
-    it("should call styles.updateStyles with genStore state, blackList users and whiteList user ", () => {
+    it("should call styles.updateStyles with genStore state, blackList users and whiteList user (toggleHighlightFavourite)", () => {
       expect.assertions(3);
 
       const styleSpy = jest.spyOn(styles, "updateStyles");
@@ -640,7 +672,7 @@ describe("eventPage", () => {
       );
     });
 
-    it("should call portHandlers.updatePorts with the current style rules", () => {
+    it("should call portHandlers.updatePorts with the current style rules (toggleHighlightFavourite)", () => {
       expect.assertions(3);
 
       const updatePortsSpy = jest.spyOn(portHandlers, "updatePorts");
@@ -763,40 +795,10 @@ describe("eventPage", () => {
       expect(createUserSpy).toHaveBeenCalledWith(newUser);
     });
 
-    it("should call styles.updateBlackList with blackList users, and general store state", () => {
+    it("should call updatePorts with the correct options (addToBlackList)", () => {
       expect.assertions(3);
 
-      const updateBlackListSpy = jest.spyOn(styles, "updateBlackList");
-      updateBlackListSpy.mockClear();
-      expect(updateBlackListSpy).not.toHaveBeenCalled();
-
-      addToBlackList({ name: "test-user", id: "1234-5" });
-
-      expect(updateBlackListSpy).toHaveBeenCalledTimes(1);
-      expect(updateBlackListSpy).toHaveBeenCalledWith(
-        blackList.getUsers(),
-        generalStore.getState()
-      );
-    });
-
-    it("should update the blackList users in chrome storage ", () => {
-      expect.assertions(3);
-
-      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
-
-      addToBlackList({ name: "test-user", id: "1234-5" });
-
-      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
-      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
-        blackList: blackList.getUsers(),
-      });
-    });
-
-    it("should call portHandlers.updatePorts with the current style rules ", () => {
-      expect.assertions(3);
-
-      const updatePortsSpy = jest.spyOn(portHandlers, "updatePorts");
-      generalStore.set({ enabled: false });
+      const updatePortsSpy = jest.spyOn(eventPageFunctions, "updatePorts");
       updatePortsSpy.mockClear();
 
       expect(updatePortsSpy).not.toHaveBeenCalled();
@@ -804,7 +806,24 @@ describe("eventPage", () => {
       addToBlackList({ name: "test-user", id: "1234-5" });
 
       expect(updatePortsSpy).toHaveBeenCalledTimes(1);
-      expect(updatePortsSpy).toHaveBeenCalledWith(styles.getStyleRules());
+      expect(updatePortsSpy).toHaveBeenCalledWith({
+        sync: ["blackList"],
+        stylesUpdate: "blackList",
+      });
+    });
+
+    it("should call runtime.sendMessage BLACKLIST_UPDATED with the updated blacklist users (addToBlackList)", () => {
+      expect.assertions(3);
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+
+      addToBlackList({ name: "test-user", id: "1234-5" });
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        type: EventMessage.BLACKLIST_UPDATED,
+        payload: blackList.getUsers(),
+      });
     });
   });
 
@@ -822,45 +841,10 @@ describe("eventPage", () => {
       expect(deleteUserSpy).toHaveBeenCalledWith(newUser.id);
     });
 
-    it("should call styles.updateBlackList with blackList users, and general store state (removeFromBlackList)", () => {
+    it("should call updatePorts with the correct options (removeFromBlackList)", () => {
       expect.assertions(3);
 
-      const updateBlackListSpy = jest.spyOn(styles, "updateBlackList");
-      const testUser = { name: "test-user", id: "1234-5" };
-      blackList.createUser(testUser);
-      updateBlackListSpy.mockClear();
-      expect(updateBlackListSpy).not.toHaveBeenCalled();
-
-      removeFromBlackList(testUser);
-
-      expect(updateBlackListSpy).toHaveBeenCalledTimes(1);
-      expect(updateBlackListSpy).toHaveBeenCalledWith(
-        blackList.getUsers(),
-        generalStore.getState()
-      );
-    });
-
-    it("should update the blackList users in chrome storage (removeFromBlackList)", () => {
-      expect.assertions(3);
-
-      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
-
-      const testUser = { name: "test-user", id: "1234-5" };
-      blackList.createUser(testUser);
-
-      removeFromBlackList(testUser);
-
-      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
-      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
-        blackList: blackList.getUsers(),
-      });
-    });
-
-    it("should call portHandlers.updatePorts with the current style rules (removeFromBlackList)", () => {
-      expect.assertions(3);
-
-      const updatePortsSpy = jest.spyOn(portHandlers, "updatePorts");
-      generalStore.set({ enabled: false });
+      const updatePortsSpy = jest.spyOn(eventPageFunctions, "updatePorts");
       updatePortsSpy.mockClear();
       const testUser = { name: "test-user", id: "1234-5" };
       blackList.createUser(testUser);
@@ -870,7 +854,177 @@ describe("eventPage", () => {
       removeFromBlackList(testUser);
 
       expect(updatePortsSpy).toHaveBeenCalledTimes(1);
-      expect(updatePortsSpy).toHaveBeenCalledWith(styles.getStyleRules());
+      expect(updatePortsSpy).toHaveBeenCalledWith({
+        sync: ["blackList"],
+        stylesUpdate: "blackList",
+      });
+    });
+
+    it("should call runtime.sendMessage BLACKLIST_UPDATED with the updated blacklist users (removeFromBlackList)", () => {
+      expect.assertions(3);
+
+      const testUser = { name: "test-user", id: "1234-5" };
+      blackList.createUser(testUser);
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+
+      removeFromBlackList(testUser);
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        type: EventMessage.BLACKLIST_UPDATED,
+        payload: blackList.getUsers(),
+      });
+    });
+  });
+
+  describe("updateBlackListUser", () => {
+    it("should call blackList.updateUser with a user.id and the updated fields", () => {
+      expect.assertions(3);
+
+      const updateUserSpy = jest.spyOn(blackList, "updateUser");
+      const testUser = { name: "test-user", id: "1234-5" };
+      const update = { name: "updated-user-name" };
+      blackList.createUser(testUser);
+
+      expect(updateUserSpy).not.toHaveBeenCalled();
+
+      updateBlackListUser(testUser, update);
+
+      expect(updateUserSpy).toHaveBeenCalledTimes(1);
+      expect(updateUserSpy).toHaveBeenCalledWith(testUser.id, update);
+    });
+
+    it("should call updatePorts with the correct options (updateBlackListUser)", () => {
+      expect.assertions(3);
+
+      const updatePortsSpy = jest.spyOn(eventPageFunctions, "updatePorts");
+      updatePortsSpy.mockClear();
+      const testUser = { name: "test-user", id: "1234-5" };
+      const update = { name: "updated-user-name" };
+      blackList.createUser(testUser);
+
+      expect(updatePortsSpy).not.toHaveBeenCalled();
+
+      updateBlackListUser(testUser, update);
+
+      expect(updatePortsSpy).toHaveBeenCalledTimes(1);
+      expect(updatePortsSpy).toHaveBeenCalledWith({
+        sync: ["blackList"],
+        stylesUpdate: "blackList",
+      });
+    });
+
+    it("should call runtime.sendMessage BLACKLIST_UPDATED with the updated blacklist users (updateBlackListUser)", () => {
+      expect.assertions(3);
+
+      const testUser = { name: "test-user", id: "1234-5" };
+      const update = { name: "updated-user-name" };
+      blackList.createUser(testUser);
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+
+      updateBlackListUser(testUser, update);
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        type: EventMessage.BLACKLIST_UPDATED,
+        payload: blackList.getUsers(),
+      });
+    });
+  });
+
+  describe("switchBlackListUser", () => {
+    it("should call whitelist.createUser with the given user (switchBlackListUser)", () => {
+      expect.assertions(3);
+
+      const createUserSpy = jest.spyOn(whiteList, "createUser");
+      createUserSpy.mockClear();
+      const testUser = { name: "test-user", id: "1234-5" };
+      expect(createUserSpy).not.toHaveBeenCalled();
+
+      switchBlackListUser(testUser);
+
+      expect(createUserSpy).toHaveBeenCalledTimes(1);
+      expect(createUserSpy).toHaveBeenCalledWith(testUser);
+    });
+
+    it("should call blackList.deleteUser with the given user, if createUser returns true", () => {
+      expect.assertions(3);
+
+      const deleteUserSpy = jest.spyOn(blackList, "deleteUser");
+      deleteUserSpy.mockClear();
+      const testUser = { name: "test-user", id: "1234-5" };
+      expect(deleteUserSpy).not.toHaveBeenCalled();
+
+      switchBlackListUser(testUser);
+
+      expect(deleteUserSpy).toHaveBeenCalledTimes(1);
+      expect(deleteUserSpy).toHaveBeenCalledWith(testUser.id);
+    });
+
+    it("should not call blackList.deleteUser, if createUser returns false", () => {
+      expect.assertions(2);
+
+      const deleteUserSpy = jest.spyOn(blackList, "deleteUser");
+      deleteUserSpy.mockClear();
+      const testUser = { name: "test-user", id: "1234-5" };
+      whiteList.createUser(testUser);
+      expect(deleteUserSpy).not.toHaveBeenCalled();
+
+      switchBlackListUser(testUser);
+
+      expect(deleteUserSpy).not.toHaveBeenCalled();
+    });
+
+    it("should call updatePorts with the expected options (switchBlackListUser)", () => {
+      expect.assertions(3);
+
+      const updatePortsSpy = jest.spyOn(eventPageFunctions, "updatePorts");
+      updatePortsSpy.mockClear();
+      const testUser = { name: "test-user", id: "1234-5" };
+
+      expect(updatePortsSpy).not.toHaveBeenCalled();
+
+      switchBlackListUser(testUser);
+
+      expect(updatePortsSpy).toHaveBeenCalledTimes(1);
+      expect(updatePortsSpy).toHaveBeenCalledWith({
+        sync: ["blackList", "whiteList"],
+        stylesUpdate: "all",
+      });
+    });
+
+    it("should call runtime.sendMessage BLACKLIST_UPDATED with the updated blacklist users (switchBlackListUser)", () => {
+      expect.assertions(3);
+
+      const testUser = { name: "test-user", id: "1234-5" };
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+
+      switchBlackListUser(testUser);
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(2);
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        type: EventMessage.BLACKLIST_UPDATED,
+        payload: blackList.getUsers(),
+      });
+    });
+
+    it("should call runtime.sendMessage WHITELIST_UPDATED with the updated whitelist users (switchBlackListUser)", () => {
+      expect.assertions(3);
+
+      const testUser = { name: "test-user", id: "1234-5" };
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+
+      switchBlackListUser(testUser);
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(2);
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        type: EventMessage.WHITELIST_UPDATED,
+        payload: whiteList.getUsers(),
+      });
     });
   });
 
@@ -879,6 +1033,7 @@ describe("eventPage", () => {
       expect.assertions(3);
 
       const createUserSpy = jest.spyOn(whiteList, "createUser");
+      createUserSpy.mockClear();
       const newUser = { name: "test-user", id: "1234-5" };
       expect(createUserSpy).not.toHaveBeenCalled();
 
@@ -888,40 +1043,10 @@ describe("eventPage", () => {
       expect(createUserSpy).toHaveBeenCalledWith(newUser);
     });
 
-    it("should call styles.updateWhiteList with whiteList users, and general store state", () => {
+    it("should call updatePorts with the correct options (addToWhiteList)", () => {
       expect.assertions(3);
 
-      const updateWhiteListSpy = jest.spyOn(styles, "updateWhiteList");
-      updateWhiteListSpy.mockClear();
-      expect(updateWhiteListSpy).not.toHaveBeenCalled();
-
-      addToWhiteList({ name: "test-user", id: "1234-5" });
-
-      expect(updateWhiteListSpy).toHaveBeenCalledTimes(1);
-      expect(updateWhiteListSpy).toHaveBeenCalledWith(
-        whiteList.getUsers(),
-        generalStore.getState()
-      );
-    });
-
-    it("should update the whiteList users in chrome storage ", () => {
-      expect.assertions(3);
-
-      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
-
-      addToWhiteList({ name: "test-user", id: "1234-5" });
-
-      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
-      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
-        whiteList: whiteList.getUsers(),
-      });
-    });
-
-    it("should call portHandlers.updatePorts with the current style rules  ", () => {
-      expect.assertions(3);
-
-      const updatePortsSpy = jest.spyOn(portHandlers, "updatePorts");
-      generalStore.set({ enabled: false });
+      const updatePortsSpy = jest.spyOn(eventPageFunctions, "updatePorts");
       updatePortsSpy.mockClear();
 
       expect(updatePortsSpy).not.toHaveBeenCalled();
@@ -929,12 +1054,29 @@ describe("eventPage", () => {
       addToWhiteList({ name: "test-user", id: "1234-5" });
 
       expect(updatePortsSpy).toHaveBeenCalledTimes(1);
-      expect(updatePortsSpy).toHaveBeenCalledWith(styles.getStyleRules());
+      expect(updatePortsSpy).toHaveBeenCalledWith({
+        sync: ["whiteList"],
+        stylesUpdate: "whiteList",
+      });
+    });
+
+    it("should call runtime.sendMessage WHITELIST_UPDATED with the updated whitelist users (addToWhiteList)", () => {
+      expect.assertions(3);
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+
+      addToWhiteList({ name: "test-user", id: "1234-5" });
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        type: EventMessage.WHITELIST_UPDATED,
+        payload: whiteList.getUsers(),
+      });
     });
   });
 
   describe("removeFromWhiteList", () => {
-    it("should call blackList.deleteUser", () => {
+    it("should call whiteList.deleteUser", () => {
       expect.assertions(3);
 
       const deleteUserSpy = jest.spyOn(whiteList, "deleteUser");
@@ -947,45 +1089,10 @@ describe("eventPage", () => {
       expect(deleteUserSpy).toHaveBeenCalledWith(newUser.id);
     });
 
-    it("should call styles.updateBlackList with whiteList users, and general store state (removeFromWhiteList)", () => {
+    it("should call updatePorts with the correct options (removeFromWhiteList)", () => {
       expect.assertions(3);
 
-      const updateWhiteListSpy = jest.spyOn(styles, "updateWhiteList");
-      const testUser = { name: "test-user", id: "1234-5" };
-      whiteList.createUser(testUser);
-      updateWhiteListSpy.mockClear();
-      expect(updateWhiteListSpy).not.toHaveBeenCalled();
-
-      removeFromWhiteList(testUser);
-
-      expect(updateWhiteListSpy).toHaveBeenCalledTimes(1);
-      expect(updateWhiteListSpy).toHaveBeenCalledWith(
-        whiteList.getUsers(),
-        generalStore.getState()
-      );
-    });
-
-    it("should update the whiteList users in chrome storage (removeFromWhiteList)", () => {
-      expect.assertions(3);
-
-      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
-
-      const testUser = { name: "test-user", id: "1234-5" };
-      whiteList.createUser(testUser);
-
-      removeFromWhiteList(testUser);
-
-      expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
-      expect(chrome.storage.sync.set).toHaveBeenCalledWith({
-        whiteList: whiteList.getUsers(),
-      });
-    });
-
-    it("should call portHandlers.updatePorts with the current style rules (removeFromWhiteList)", () => {
-      expect.assertions(3);
-
-      const updatePortsSpy = jest.spyOn(portHandlers, "updatePorts");
-      generalStore.set({ enabled: false });
+      const updatePortsSpy = jest.spyOn(eventPageFunctions, "updatePorts");
       updatePortsSpy.mockClear();
       const testUser = { name: "test-user", id: "1234-5" };
       whiteList.createUser(testUser);
@@ -995,13 +1102,183 @@ describe("eventPage", () => {
       removeFromWhiteList(testUser);
 
       expect(updatePortsSpy).toHaveBeenCalledTimes(1);
-      expect(updatePortsSpy).toHaveBeenCalledWith(styles.getStyleRules());
+      expect(updatePortsSpy).toHaveBeenCalledWith({
+        sync: ["whiteList"],
+        stylesUpdate: "whiteList",
+      });
+    });
+
+    it("should call runtime.sendMessage WHITELIST_UPDATED with the updated whitelist users (removeFromWhiteList)", () => {
+      expect.assertions(3);
+
+      const testUser = { name: "test-user", id: "1234-5" };
+      whiteList.createUser(testUser);
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+
+      removeFromWhiteList(testUser);
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        type: EventMessage.WHITELIST_UPDATED,
+        payload: whiteList.getUsers(),
+      });
+    });
+  });
+
+  describe("updateWhiteListUser", () => {
+    it("should call whiteList.updateUser with a user.id and the updated fields", () => {
+      expect.assertions(3);
+
+      const updateUserSpy = jest.spyOn(whiteList, "updateUser");
+      const testUser = { name: "test-user", id: "1234-5" };
+      const update = { name: "updated-user-name" };
+      whiteList.createUser(testUser);
+
+      expect(updateUserSpy).not.toHaveBeenCalled();
+
+      updateWhiteListUser(testUser, update);
+
+      expect(updateUserSpy).toHaveBeenCalledTimes(1);
+      expect(updateUserSpy).toHaveBeenCalledWith(testUser.id, update);
+    });
+
+    it("should call updatePorts with the correct options (updateWhiteListUser)", () => {
+      expect.assertions(3);
+
+      const updatePortsSpy = jest.spyOn(eventPageFunctions, "updatePorts");
+      updatePortsSpy.mockClear();
+      const testUser = { name: "test-user", id: "1234-5" };
+      const update = { name: "updated-user-name" };
+      whiteList.createUser(testUser);
+
+      expect(updatePortsSpy).not.toHaveBeenCalled();
+
+      updateWhiteListUser(testUser, update);
+
+      expect(updatePortsSpy).toHaveBeenCalledTimes(1);
+      expect(updatePortsSpy).toHaveBeenCalledWith({
+        sync: ["whiteList"],
+        stylesUpdate: "whiteList",
+      });
+    });
+
+    it("should call runtime.sendMessage WHITELIST_UPDATED with the updated whitelist users (updateWhiteListUser)", () => {
+      expect.assertions(3);
+
+      const testUser = { name: "test-user", id: "1234-5" };
+      const update = { name: "updated-user-name" };
+      whiteList.createUser(testUser);
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+
+      updateWhiteListUser(testUser, update);
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        type: EventMessage.WHITELIST_UPDATED,
+        payload: whiteList.getUsers(),
+      });
+    });
+  });
+
+  describe("switchWhiteListUser", () => {
+    it("should call blacklist.createUser with the given user (switchWhiteListUser)", () => {
+      expect.assertions(3);
+
+      const createUserSpy = jest.spyOn(blackList, "createUser");
+      createUserSpy.mockClear();
+      const testUser = { name: "test-user", id: "1234-5" };
+      expect(createUserSpy).not.toHaveBeenCalled();
+
+      switchWhiteListUser(testUser);
+
+      expect(createUserSpy).toHaveBeenCalledTimes(1);
+      expect(createUserSpy).toHaveBeenCalledWith(testUser);
+    });
+
+    it("should call whiteList.deleteUser with the given user, if createUser returns true", () => {
+      expect.assertions(3);
+
+      const deleteUserSpy = jest.spyOn(whiteList, "deleteUser");
+      deleteUserSpy.mockClear();
+      const testUser = { name: "test-user", id: "1234-5" };
+      expect(deleteUserSpy).not.toHaveBeenCalled();
+
+      switchWhiteListUser(testUser);
+
+      expect(deleteUserSpy).toHaveBeenCalledTimes(1);
+      expect(deleteUserSpy).toHaveBeenCalledWith(testUser.id);
+    });
+
+    it("should not call whiteList.deleteUser, if createUser returns false", () => {
+      expect.assertions(2);
+
+      const deleteUserSpy = jest.spyOn(whiteList, "deleteUser");
+      deleteUserSpy.mockClear();
+      const testUser = { name: "test-user", id: "1234-5" };
+      blackList.createUser(testUser);
+      expect(deleteUserSpy).not.toHaveBeenCalled();
+
+      switchWhiteListUser(testUser);
+
+      expect(deleteUserSpy).not.toHaveBeenCalled();
+    });
+
+    it("should call updatePorts with the expected options (switchWhiteListUser)", () => {
+      expect.assertions(3);
+
+      const updatePortsSpy = jest.spyOn(eventPageFunctions, "updatePorts");
+      updatePortsSpy.mockClear();
+      const testUser = { name: "test-user", id: "1234-5" };
+
+      expect(updatePortsSpy).not.toHaveBeenCalled();
+
+      switchWhiteListUser(testUser);
+
+      expect(updatePortsSpy).toHaveBeenCalledTimes(1);
+      expect(updatePortsSpy).toHaveBeenCalledWith({
+        sync: ["blackList", "whiteList"],
+        stylesUpdate: "all",
+      });
+    });
+
+    it("should call runtime.sendMessage BLACKLIST_UPDATED with the updated blacklist users (switchWhiteListUser)", () => {
+      expect.assertions(3);
+
+      const testUser = { name: "test-user", id: "1234-5" };
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+
+      switchWhiteListUser(testUser);
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(2);
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        type: EventMessage.BLACKLIST_UPDATED,
+        payload: blackList.getUsers(),
+      });
+    });
+
+    it("should call runtime.sendMessage WHITELIST_UPDATED with the updated whitelist users (switchWhiteListUser)", () => {
+      expect.assertions(3);
+
+      const testUser = { name: "test-user", id: "1234-5" };
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+
+      switchWhiteListUser(testUser);
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(2);
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        type: EventMessage.WHITELIST_UPDATED,
+        payload: whiteList.getUsers(),
+      });
     });
   });
 
   describe("addRuntimeListener", () => {
-    it("should call runtimeListener with the current generalStore", () => {
-      expect.assertions(3);
+    it("should call runtimeListener", () => {
+      expect.assertions(2);
 
       expect(mockRuntimeListenerModule.runtimeListener).not.toHaveBeenCalled();
 
@@ -1009,9 +1286,6 @@ describe("eventPage", () => {
 
       expect(mockRuntimeListenerModule.runtimeListener).toHaveBeenCalledTimes(
         1
-      );
-      expect(mockRuntimeListenerModule.runtimeListener).toHaveBeenCalledWith(
-        generalStore
       );
     });
 
@@ -1025,7 +1299,7 @@ describe("eventPage", () => {
       expect(chrome.runtime.onMessage.hasListeners()).toBe(true);
       expect(
         chrome.runtime.onMessage.hasListener(
-          mockRuntimeListenerModule.runtimeListener(generalStore)
+          mockRuntimeListenerModule.runtimeListener()
         )
       ).toBe(true);
     });

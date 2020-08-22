@@ -7,22 +7,34 @@ import {
   switchBlocking,
   addToBlackList,
   removeFromBlackList,
+  updateBlackListUser,
   addToWhiteList,
   removeFromWhiteList,
+  updateWhiteListUser,
+  blackList,
+  whiteList,
+  generalStore,
+  switchBlackListUser,
+  switchWhiteListUser,
 } from "../eventPage";
-import { GeneralStore } from "../Classes";
 
 const {
   CONTENT_SCRIPT_MOUNTED,
   POPUP_MOUNTED,
+  GET_BLACKLIST,
+  GET_WHITELIST,
   TOGGLE_ENABLED,
   TOGGLE_HIGHLIGHT_BLOCKED,
   TOGGLE_HIGHLIGHT_FAVOURITE,
   SWITCH_BLOCKING,
   BLACKLIST_ADD,
   BLACKLIST_REMOVE,
+  BLACKLIST_UPDATE_USER,
+  BLACKLIST_SWITCH_USER,
   WHITELIST_ADD,
   WHITELIST_REMOVE,
+  WHITELIST_UPDATE_USER,
+  WHITELIST_SWITCH_USER,
 } = EventMessage;
 
 export const sendRuntimeMessage = (message: {
@@ -35,7 +47,7 @@ export const setSync = (payload: { [x: string]: any }) => {
   chrome.storage.sync.set(payload);
 };
 
-export const runtimeListener = (genStore: GeneralStore) => (
+export const runtimeListener = () => (
   req,
   sender: chrome.runtime.MessageSender,
   sendResponse: (response?: any) => void
@@ -49,7 +61,15 @@ export const runtimeListener = (genStore: GeneralStore) => (
         break;
 
       case POPUP_MOUNTED:
-        sendResponse(genStore.getState());
+        sendResponse(generalStore.getState());
+        break;
+
+      case GET_BLACKLIST:
+        sendResponse(blackList.getUsers());
+        break;
+
+      case GET_WHITELIST:
+        sendResponse(whiteList.getUsers());
         break;
 
       case TOGGLE_ENABLED:
@@ -76,12 +96,28 @@ export const runtimeListener = (genStore: GeneralStore) => (
         removeFromBlackList(req.payload);
         break;
 
-      case WHITELIST_REMOVE:
-        removeFromWhiteList(req.payload);
+      case BLACKLIST_UPDATE_USER:
+        updateBlackListUser(req.payload.user, req.payload.update);
+        break;
+
+      case BLACKLIST_SWITCH_USER:
+        switchBlackListUser(req.payload);
         break;
 
       case WHITELIST_ADD:
         addToWhiteList(req.payload);
+        break;
+
+      case WHITELIST_REMOVE:
+        removeFromWhiteList(req.payload);
+        break;
+
+      case WHITELIST_UPDATE_USER:
+        updateWhiteListUser(req.payload.user, req.payload.update);
+        break;
+
+      case WHITELIST_SWITCH_USER:
+        switchWhiteListUser(req.payload);
         break;
 
       default:

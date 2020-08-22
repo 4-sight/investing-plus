@@ -16,15 +16,21 @@ export enum EventMessage {
   "TOGGLE_HIGHLIGHT_BLOCKED",
   "TOGGLE_HIGHLIGHT_FAVOURITE",
   "SWITCH_BLOCKING",
+  "GET_BLACKLIST",
+  "GET_WHITELIST",
   "BLACKLIST_ADD",
   "BLACKLIST_REMOVE",
+  "BLACKLIST_UPDATE_USER",
+  "BLACKLIST_SWITCH_USER",
   "WHITELIST_ADD",
   "WHITELIST_REMOVE",
+  "WHITELIST_UPDATE_USER",
+  "WHITELIST_SWITCH_USER",
 }
 
 export type Message = {
   type: EventMessage;
-  payload: any;
+  payload?: any;
 };
 
 export type Command = {
@@ -71,6 +77,6 @@ export type StyleMap = Map<StyleRule, string>;
 export type PortMap = Map<number, PortHandler>;
 
 export type UpdatePorts = (options?: {
-  sync?: StoreName;
+  sync?: StoreName[];
   stylesUpdate?: "all" | ListName;
 }) => void;

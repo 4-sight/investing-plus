@@ -36,20 +36,22 @@ export const sendRuntimeMessage = (message: {
   chrome.runtime.sendMessage(message);
 };
 
-export const updateChromeStorage = (store: StoreName) => {
-  switch (store) {
-    case "genStore":
-      chrome.storage.sync.set({ generalStore: generalStore.getState() });
-      break;
+export const updateChromeStorage = (stores: StoreName[]) => {
+  stores.forEach((store) => {
+    switch (store) {
+      case "genStore":
+        chrome.storage.sync.set({ generalStore: generalStore.getState() });
+        break;
 
-    case "blackList":
-      chrome.storage.sync.set({ blackList: blackList.getUsers() });
-      break;
+      case "blackList":
+        chrome.storage.sync.set({ blackList: blackList.getUsers() });
+        break;
 
-    case "whiteList":
-      chrome.storage.sync.set({ whiteList: whiteList.getUsers() });
-      break;
-  }
+      case "whiteList":
+        chrome.storage.sync.set({ whiteList: whiteList.getUsers() });
+        break;
+    }
+  });
 };
 
 export const updateStyles = () => {
@@ -135,7 +137,6 @@ export const syncChromeStorage = () => {
 //Actions========================================
 
 export const linkToContentScript = (tab: chrome.tabs.Tab) => {
-  console.log("LINK, styles: ", styles.getStyleRules());
   const portHandler = new PortHandler(tab, portHandlers.removePort(tab.id));
   portHandler.initialize(styles.getStyleRules(), generalStore.get("enabled"));
   portHandlers.addPort(tab.id, portHandler);
@@ -149,7 +150,7 @@ export const toggleEnabled = () => {
     payload: generalStore.getState(),
   });
 
-  updateChromeStorage("genStore");
+  updateChromeStorage(["genStore"]);
 
   generalStore.get("enabled")
     ? portHandlers.enablePorts()
@@ -164,7 +165,7 @@ export const toggleHighlightBlocked = () => {
     payload: generalStore.getState(),
   });
 
-  updatePorts({ sync: "genStore", stylesUpdate: "all" });
+  updatePorts({ sync: ["genStore"], stylesUpdate: "all" });
 };
 
 export const toggleHighlightFavourite = () => {
@@ -177,7 +178,7 @@ export const toggleHighlightFavourite = () => {
     payload: generalStore.getState(),
   });
 
-  updatePorts({ sync: "genStore", stylesUpdate: "all" });
+  updatePorts({ sync: ["genStore"], stylesUpdate: "all" });
 };
 
 export const switchBlocking = () => {
@@ -192,30 +193,108 @@ export const switchBlocking = () => {
     payload: generalStore.getState(),
   });
 
-  updatePorts({ sync: "genStore", stylesUpdate: "all" });
+  updatePorts({ sync: ["genStore"], stylesUpdate: "all" });
 };
 
 export const addToBlackList = (user: User) => {
   if (blackList.createUser(user)) {
-    updatePorts({ sync: "blackList", stylesUpdate: "blackList" });
+    updatePorts({ sync: ["blackList"], stylesUpdate: "blackList" });
+
+    sendRuntimeMessage({
+      type: EventMessage.BLACKLIST_UPDATED,
+      payload: blackList.getUsers(),
+    });
   }
 };
 
 export const removeFromBlackList = (user: User) => {
   if (blackList.deleteUser(user.id)) {
-    updatePorts({ sync: "blackList", stylesUpdate: "blackList" });
+    updatePorts({ sync: ["blackList"], stylesUpdate: "blackList" });
+
+    sendRuntimeMessage({
+      type: EventMessage.BLACKLIST_UPDATED,
+      payload: blackList.getUsers(),
+    });
+  }
+};
+
+export const updateBlackListUser = (user: User, update: Partial<User>) => {
+  if (blackList.updateUser(user.id, update)) {
+    updatePorts({ sync: ["blackList"], stylesUpdate: "blackList" });
+
+    sendRuntimeMessage({
+      type: EventMessage.BLACKLIST_UPDATED,
+      payload: blackList.getUsers(),
+    });
+  }
+};
+
+export const switchBlackListUser = (user: User) => {
+  if (whiteList.createUser(user)) {
+    blackList.deleteUser(user.id);
+
+    updatePorts({ stylesUpdate: "all", sync: ["blackList", "whiteList"] });
+
+    sendRuntimeMessage({
+      type: EventMessage.BLACKLIST_UPDATED,
+      payload: blackList.getUsers(),
+    });
+
+    sendRuntimeMessage({
+      type: EventMessage.WHITELIST_UPDATED,
+      payload: whiteList.getUsers(),
+    });
   }
 };
 
 export const addToWhiteList = (user: User) => {
   if (whiteList.createUser(user)) {
-    updatePorts({ stylesUpdate: "whiteList", sync: "whiteList" });
+    updatePorts({ stylesUpdate: "whiteList", sync: ["whiteList"] });
+
+    sendRuntimeMessage({
+      type: EventMessage.WHITELIST_UPDATED,
+      payload: whiteList.getUsers(),
+    });
   }
 };
 
 export const removeFromWhiteList = (user: User) => {
   if (whiteList.deleteUser(user.id)) {
-    updatePorts({ stylesUpdate: "whiteList", sync: "whiteList" });
+    updatePorts({ stylesUpdate: "whiteList", sync: ["whiteList"] });
+
+    sendRuntimeMessage({
+      type: EventMessage.WHITELIST_UPDATED,
+      payload: whiteList.getUsers(),
+    });
+  }
+};
+
+export const updateWhiteListUser = (user: User, update: Partial<User>) => {
+  if (whiteList.updateUser(user.id, update)) {
+    updatePorts({ sync: ["whiteList"], stylesUpdate: "whiteList" });
+
+    sendRuntimeMessage({
+      type: EventMessage.WHITELIST_UPDATED,
+      payload: whiteList.getUsers(),
+    });
+  }
+};
+
+export const switchWhiteListUser = (user: User) => {
+  if (blackList.createUser(user)) {
+    whiteList.deleteUser(user.id);
+
+    updatePorts({ stylesUpdate: "all", sync: ["blackList", "whiteList"] });
+
+    sendRuntimeMessage({
+      type: EventMessage.BLACKLIST_UPDATED,
+      payload: blackList.getUsers(),
+    });
+
+    sendRuntimeMessage({
+      type: EventMessage.WHITELIST_UPDATED,
+      payload: whiteList.getUsers(),
+    });
   }
 };
 
@@ -223,7 +302,7 @@ export const removeFromWhiteList = (user: User) => {
 // Add listeners
 
 export const addRuntimeListener = () => {
-  chrome.runtime.onMessage.addListener(runtimeListener(generalStore));
+  chrome.runtime.onMessage.addListener(runtimeListener());
 };
 
 export const addStorageListener = () => {
