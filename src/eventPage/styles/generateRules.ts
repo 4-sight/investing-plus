@@ -39,5 +39,8 @@ export const generateRules = (
     }
   }
 
-  return activeStyles.join(" ");
+  activeStyles.push(styles.get(StyleRule.BLACKLIST_USER_BUTTONS));
+  activeStyles.push(styles.get(StyleRule.WHITELIST_USER_BUTTONS));
+
+  return activeStyles.join(" ").trim();
 };

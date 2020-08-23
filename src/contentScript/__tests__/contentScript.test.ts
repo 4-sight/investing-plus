@@ -11,10 +11,13 @@ const mockPortListener = (portListener as unknown) as jest.Mock;
 describe("contentScript", () => {
   // Setup
   let mockPort;
-  const mockStyle = "style-element";
+  const mockStyle = {};
   const document = {
     createElement: jest.fn(() => mockStyle),
     getElementsByClassName: jest.fn(() => []),
+    body: {
+      appendChild: jest.fn(),
+    },
   };
   const mockListener = "mock-listener";
 
@@ -22,6 +25,7 @@ describe("contentScript", () => {
     mockPortListener.mockClear();
     mockPortListener.mockImplementation(() => mockListener);
     document.createElement.mockClear();
+    document.body.appendChild.mockClear();
     global.document = document as any;
     mockPort = new MockPort(1234);
     chrome.runtime.sendMessage.mockClear();
@@ -32,14 +36,25 @@ describe("contentScript", () => {
 
   //==========================================
 
-  it("should create a style element", () => {
+  it("should create two style elements", () => {
     expect.assertions(3);
     expect(document.createElement).not.toHaveBeenCalled();
 
     contentScript();
 
-    expect(document.createElement).toHaveBeenCalledTimes(1);
+    expect(document.createElement).toHaveBeenCalledTimes(2);
     expect(document.createElement).toHaveBeenCalledWith("style");
+  });
+
+  it("should append one style element to the document body", () => {
+    expect.assertions(3);
+
+    expect(document.body.appendChild).not.toHaveBeenCalled();
+
+    contentScript();
+
+    expect(document.body.appendChild).toHaveBeenCalledTimes(1);
+    expect(document.body.appendChild).toHaveBeenCalledWith(mockStyle);
   });
 
   it("should add an onConnect listener", () => {

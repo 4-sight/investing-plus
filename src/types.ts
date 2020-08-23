@@ -70,6 +70,8 @@ export enum StyleRule {
   "WHITELIST",
   "HIGHLIGHT_BLOCKED",
   "HIGHLIGHT_FAVOURITE",
+  "BLACKLIST_USER_BUTTONS",
+  "WHITELIST_USER_BUTTONS",
 }
 
 export type StyleMap = Map<StyleRule, string>;

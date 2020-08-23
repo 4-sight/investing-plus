@@ -5,8 +5,7 @@ export const whiteListStyles = (whiteList: Users): string =>
     ? whiteList
         .reduce(
           (style: string, user: User) =>
-            style +
-            ` .js-comment[data-user-id="${user.id}"] {display: block;} .list-add[data-user-id="${user.id}"], .black-list-remove[data-user-id="${user.id}"] {display: none;}`,
+            style + ` .js-comment[data-user-id="${user.id}"] {display: block;}`,
           ".js-comment {display: none;}"
         )
         .trim()

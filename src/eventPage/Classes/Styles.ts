@@ -1,16 +1,12 @@
-import {
-  StyleMap,
-  GeneralStoreState,
-  Users,
-  User,
-  StyleRule,
-} from "../../types";
+import { StyleMap, GeneralStoreState, Users, StyleRule } from "../../types";
 import {
   generateRules,
   blackListStyles,
   whiteListStyles,
   highlightBlockedStyles,
   highlightFavouriteStyles,
+  handleBlackListButtonStyles,
+  handleWhiteListButtonStyles,
 } from "../styles";
 
 export class Styles {
@@ -18,6 +14,8 @@ export class Styles {
   private styleRules: string = "";
 
   constructor(genState: GeneralStoreState, blackList: Users, whiteList: Users) {
+    this.handleBlackListButtons(blackList);
+    this.handleWhiteListButtons(whiteList);
     this.createBlackListStyles(blackList);
     this.createWhiteListStyles(whiteList);
     this.createHighlightBlockedStyles(blackList);
@@ -51,7 +49,22 @@ export class Styles {
     this.styleMap.set(StyleRule.WHITELIST, whiteListStyles(whiteList));
   };
 
+  private handleBlackListButtons = (blackList: Users) => {
+    this.styleMap.set(
+      StyleRule.BLACKLIST_USER_BUTTONS,
+      handleBlackListButtonStyles(blackList)
+    );
+  };
+
+  private handleWhiteListButtons = (whiteList: Users) => {
+    this.styleMap.set(
+      StyleRule.WHITELIST_USER_BUTTONS,
+      handleWhiteListButtonStyles(whiteList)
+    );
+  };
+
   updateBlackList = (blackList: Users, genState: GeneralStoreState): string => {
+    this.handleBlackListButtons(blackList);
     this.createBlackListStyles(blackList);
     this.createHighlightBlockedStyles(blackList);
     this.updateStyleRules(genState);
@@ -59,6 +72,7 @@ export class Styles {
   };
 
   updateWhiteList = (whiteList: Users, genState: GeneralStoreState): string => {
+    this.handleWhiteListButtons(whiteList);
     this.createWhiteListStyles(whiteList);
     this.createHighlightFavouriteStyles(whiteList);
     this.updateStyleRules(genState);
@@ -70,6 +84,8 @@ export class Styles {
     blackList: Users,
     whiteList: Users
   ): string => {
+    this.handleBlackListButtons(blackList);
+    this.handleWhiteListButtons(whiteList);
     this.createBlackListStyles(blackList);
     this.createWhiteListStyles(whiteList);
     this.createHighlightBlockedStyles(blackList);
