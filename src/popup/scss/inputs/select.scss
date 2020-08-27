@@ -1,0 +1,43 @@
+.select-input {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  width: 15rem;
+
+  .select-status-display {
+    border-bottom: 2px solid $color-black-3;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+
+    .drop-down-indicator {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  .drop-down {
+    position: absolute;
+    top: 1.8rem;
+    width: 12rem;
+
+    .select-options {
+      margin: 0;
+      padding: 0;
+
+      .select-option {
+        background-color: #fff;
+        list-style: none;
+        padding: 0.2rem;
+        cursor: pointer;
+
+        &:hover {
+          background-color: $color-blue-1;
+          color: $color-white-1;
+        }
+      }
+    }
+  }
+}

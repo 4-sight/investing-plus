@@ -1,9 +1,15 @@
+import colors from "../popup/scss/colours.module.scss";
+
 export default `
+.i-plus-block-buttons {
+  margin-left: 1rem;
+}
+
 .i-plus-list-button {
   display: inline-block;
   border: none;
   padding: 0;
-  margin: 0.5rem;
+  margin: 0 0.3rem;
   text-decoration: none;
   background: transparent;
   color: #ffffff;
@@ -17,21 +23,26 @@ export default `
   -moz-appearance: none;
 }
 
+.commentUsername {
+  display: flex;
+  align-items: flex-start;
+}
+
 .black-list-add {
-  color: red
+  color: ${colors.red1};
 }
 
 .black-list-remove {
-  color: green;
+  color: ${colors.green1};
   display: none;
 }
 
 .white-list-add {
-  color: blue
+  color: ${colors.blue1};
 }
 
 .white-list-remove {
-  color: #333;
+  color: ${colors.black3};
   display: none
 }
 `;

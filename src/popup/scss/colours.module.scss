@@ -1,0 +1,23 @@
+$color-black-1: rgb(58, 58, 61);
+$color-black-2: rgb(82, 82, 93);
+$color-black-3: rgb(178, 178, 187);
+$color-white-1: rgb(255, 255, 255);
+$color-white-2: rgb(241, 240, 233);
+$color-red-1: rgb(184, 41, 41);
+$color-green-1: rgb(37, 146, 92);
+$color-blue-1: rgb(110, 161, 195);
+$color-blue-2: rgb(193, 215, 230);
+$color-blue-3: rgb(30, 69, 199);
+
+:export {
+  black1: $color-black-1;
+  black2: $color-black-2;
+  black3: $color-black-3;
+  white1: $color-white-1;
+  white2: $color-white-2;
+  red1: $color-red-1;
+  green1: $color-green-1;
+  blue1: $color-blue-1;
+  blue2: $color-blue-2;
+  blue3: $color-blue-3;
+}

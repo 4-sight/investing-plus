@@ -181,11 +181,9 @@ export const toggleHighlightFavourite = () => {
   updatePorts({ sync: ["genStore"], stylesUpdate: "all" });
 };
 
-export const switchBlocking = () => {
-  const blockingOptions = Object.keys(Blocking).length / 2;
+export const setBlocking = (blocking: Blocking) => {
   generalStore.set({
-    blocking:
-      (generalStore.get("blocking") + (blockingOptions + 1)) % blockingOptions,
+    blocking,
   });
 
   sendRuntimeMessage({

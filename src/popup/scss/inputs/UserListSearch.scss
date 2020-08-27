@@ -1,0 +1,30 @@
+.user-list-search {
+  display: flex;
+  padding: 1rem;
+  align-items: center;
+  box-sizing: border-box;
+
+  .search-label {
+    padding-right: 1rem;
+    text-transform: capitalize;
+    color: $color-black-1;
+    font-weight: bold;
+  }
+
+  .search-box {
+    box-sizing: border-box;
+    border-radius: 0;
+    border: none;
+    box-shadow: 0 2px 0 0 $color-black-3;
+    font-size: 1rem;
+    padding: 0.5rem;
+    background: transparent;
+    color: $color-black-1;
+
+    &:focus {
+      border-radius: 3px;
+      outline: none;
+      box-shadow: 0 0 0 2px $color-black-3;
+    }
+  }
+}

@@ -1,0 +1,12 @@
+.user-list-sort {
+  display: flex;
+  padding: 1rem;
+  align-items: center;
+
+  .sort-label {
+    text-transform: capitalize;
+    padding-right: 1rem;
+    color: $color-black-1;
+    font-weight: bold;
+  }
+}

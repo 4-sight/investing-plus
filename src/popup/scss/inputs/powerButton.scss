@@ -1,0 +1,28 @@
+.power-button-wrapper {
+  display: flex;
+  justify-items: center;
+  align-content: center;
+
+  #power-button {
+    border-radius: 50%;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.08);
+    }
+  }
+
+  #power-button.enabled {
+    color: $color-green-1;
+  }
+
+  #power-button.disabled {
+    color: $color-red-1;
+  }
+
+  .icon-power-off {
+    width: 3rem;
+    height: 3rem;
+    padding: 0.5rem;
+  }
+}

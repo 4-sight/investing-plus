@@ -11,7 +11,7 @@ import {
   toggleEnabled,
   toggleHighlightBlocked,
   toggleHighlightFavourite,
-  switchBlocking,
+  setBlocking,
   addToBlackList,
   removeFromBlackList,
   updateBlackListUser,
@@ -688,7 +688,7 @@ describe("eventPage", () => {
     });
   });
 
-  describe("switchBlocking", () => {
+  describe("setBlocking", () => {
     it("should call generalStore.set with expected blocking state", () => {
       expect.assertions(7);
 
@@ -698,26 +698,24 @@ describe("eventPage", () => {
       genStoreSpy.mockClear();
       expect(genStoreSpy).not.toHaveBeenCalled();
 
-      switchBlocking();
+      setBlocking(Blocking.NONE);
       expect(genStoreSpy).toHaveBeenCalledTimes(1);
       expect(genStoreSpy).toHaveBeenCalledWith({
-        blocking: 1,
+        blocking: Blocking.NONE,
       });
 
-      generalStore.set({ blocking: 1 });
       genStoreSpy.mockClear();
-      switchBlocking();
+      setBlocking(Blocking.BLACKLIST);
       expect(genStoreSpy).toHaveBeenCalledTimes(1);
       expect(genStoreSpy).toHaveBeenLastCalledWith({
-        blocking: 2,
+        blocking: Blocking.BLACKLIST,
       });
 
-      generalStore.set({ blocking: Object.keys(Blocking).length / 2 - 1 });
       genStoreSpy.mockClear();
-      switchBlocking();
+      setBlocking(Blocking.WHITELIST);
       expect(genStoreSpy).toHaveBeenCalledTimes(1);
       expect(genStoreSpy).toHaveBeenLastCalledWith({
-        blocking: 0,
+        blocking: Blocking.WHITELIST,
       });
     });
 
@@ -726,7 +724,7 @@ describe("eventPage", () => {
 
       expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
 
-      switchBlocking();
+      setBlocking(Blocking.BLACKLIST);
 
       expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
       expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
@@ -740,7 +738,7 @@ describe("eventPage", () => {
 
       expect(chrome.storage.sync.set).not.toHaveBeenCalled();
 
-      switchBlocking();
+      setBlocking(Blocking.BLACKLIST);
 
       expect(chrome.storage.sync.set).toHaveBeenCalledTimes(1);
       expect(chrome.storage.sync.set).toHaveBeenCalledWith({
@@ -748,14 +746,14 @@ describe("eventPage", () => {
       });
     });
 
-    it("should call styles.updateStyles with genStore state, blackList users and whiteList user (switchBlocking)", () => {
+    it("should call styles.updateStyles with genStore state, blackList users and whiteList user (setBlocking)", () => {
       expect.assertions(3);
 
       const styleSpy = jest.spyOn(styles, "updateStyles");
       styleSpy.mockClear();
       expect(styleSpy).not.toHaveBeenCalled();
 
-      switchBlocking();
+      setBlocking(Blocking.BLACKLIST);
 
       expect(styleSpy).toHaveBeenCalledTimes(1);
       expect(styleSpy).toHaveBeenCalledWith(
@@ -765,7 +763,7 @@ describe("eventPage", () => {
       );
     });
 
-    it("should call portHandlers.updatePorts with the current style rules (switchBlocking)", () => {
+    it("should call portHandlers.updatePorts with the current style rules (setBlocking)", () => {
       expect.assertions(3);
 
       const updatePortsSpy = jest.spyOn(portHandlers, "updatePorts");
@@ -774,7 +772,7 @@ describe("eventPage", () => {
 
       expect(updatePortsSpy).not.toHaveBeenCalled();
 
-      switchBlocking();
+      setBlocking(Blocking.BLACKLIST);
 
       expect(updatePortsSpy).toHaveBeenCalledTimes(1);
       expect(updatePortsSpy).toHaveBeenCalledWith(styles.getStyleRules());

@@ -1,0 +1,18 @@
+.popupContainer {
+  .popup-header {
+    display: flex;
+    justify-content: space-evenly;
+    padding: 0 1rem;
+    color: $color-black-1;
+  }
+
+  .nav-bar {
+    display: flex;
+    padding: 0 1rem;
+    border-bottom: 2px solid $color-black-3;
+  }
+
+  .popup-body {
+    padding: 1rem;
+  }
+}

@@ -4,7 +4,7 @@ import {
   toggleEnabled,
   toggleHighlightBlocked,
   toggleHighlightFavourite,
-  switchBlocking,
+  setBlocking,
   addToWhiteList,
   removeFromWhiteList,
   updateWhiteListUser,
@@ -19,7 +19,7 @@ import {
 } from "../../eventPage";
 import { GeneralStore, UsersStore } from "../../Classes";
 import { defaults } from "../../../testHelpers";
-import { EventMessage } from "../../../types";
+import { EventMessage, Blocking } from "../../../types";
 
 jest.mock("../../eventPage", () => {
   const {
@@ -33,7 +33,7 @@ jest.mock("../../eventPage", () => {
     toggleEnabled: jest.fn(),
     toggleHighlightBlocked: jest.fn(),
     toggleHighlightFavourite: jest.fn(),
-    switchBlocking: jest.fn(),
+    setBlocking: jest.fn(),
     addToBlackList: jest.fn(),
     removeFromBlackList: jest.fn(),
     updateBlackListUser: jest.fn(),
@@ -52,7 +52,7 @@ const mockLinkToContentScript = (linkToContentScript as unknown) as jest.Mock;
 const mockToggleEnabled = (toggleEnabled as unknown) as jest.Mock;
 const mockToggleHighlightBlocked = (toggleHighlightBlocked as unknown) as jest.Mock;
 const mockToggleHighlightFavourite = (toggleHighlightFavourite as unknown) as jest.Mock;
-const mockSwitchBlocking = (switchBlocking as unknown) as jest.Mock;
+const mockSetBlocking = (setBlocking as unknown) as jest.Mock;
 const mockAddToBlackList = (addToBlackList as unknown) as jest.Mock;
 const mockRemoveFromBlackList = (removeFromBlackList as unknown) as jest.Mock;
 const mockUpdateBlackListUser = (updateBlackListUser as unknown) as jest.Mock;
@@ -72,7 +72,7 @@ describe("runtimeListener", () => {
     mockToggleEnabled.mockClear();
     mockToggleHighlightBlocked.mockClear();
     mockToggleHighlightFavourite.mockClear();
-    mockSwitchBlocking.mockClear();
+    mockSetBlocking.mockClear();
     mockAddToBlackList.mockClear();
     mockRemoveFromBlackList.mockClear();
     mockUpdateBlackListUser.mockClear();
@@ -227,21 +227,23 @@ describe("runtimeListener", () => {
     });
   });
 
-  describe("SWITCH_BLOCKING", () => {
-    it("should call switchBlocking", () => {
-      expect.assertions(2);
+  describe("SET_BLOCKING", () => {
+    it("should call setBlocking, with the payload", () => {
+      expect.assertions(3);
 
-      expect(mockSwitchBlocking).not.toHaveBeenCalled();
+      expect(mockSetBlocking).not.toHaveBeenCalled();
 
       listener(
         {
-          type: EventMessage.SWITCH_BLOCKING,
+          type: EventMessage.SET_BLOCKING,
+          payload: Blocking.BLACKLIST,
         },
         {},
         () => {}
       );
 
-      expect(mockSwitchBlocking).toHaveBeenCalledTimes(1);
+      expect(mockSetBlocking).toHaveBeenCalledTimes(1);
+      expect(mockSetBlocking).toHaveBeenCalledWith(Blocking.BLACKLIST);
     });
   });
 

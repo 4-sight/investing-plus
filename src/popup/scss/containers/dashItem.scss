@@ -1,0 +1,22 @@
+.dash-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4rem;
+
+  .data-block {
+    display: flex;
+    label {
+      font-weight: bold;
+      color: $color-black-1;
+    }
+
+    .status {
+      padding-left: 1rem;
+    }
+  }
+
+  .ui-block {
+    align-content: flex-start;
+  }
+}

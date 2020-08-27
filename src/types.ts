@@ -15,7 +15,7 @@ export enum EventMessage {
   "TOGGLE_ENABLED",
   "TOGGLE_HIGHLIGHT_BLOCKED",
   "TOGGLE_HIGHLIGHT_FAVOURITE",
-  "SWITCH_BLOCKING",
+  "SET_BLOCKING",
   "GET_BLACKLIST",
   "GET_WHITELIST",
   "BLACKLIST_ADD",
@@ -74,11 +74,26 @@ export enum StyleRule {
   "WHITELIST_USER_BUTTONS",
 }
 
-export type StyleMap = Map<StyleRule, string>;
-
 export type PortMap = Map<number, PortHandler>;
+
+export type StyleMap = Map<StyleRule, string>;
 
 export type UpdatePorts = (options?: {
   sync?: StoreName[];
   stylesUpdate?: "all" | ListName;
 }) => void;
+
+export type UserContextActions = {
+  add: (user: User) => void;
+  remove: (user: User) => void;
+  update: (user: User, update: Partial<User>) => void;
+  switchList: (user: User) => void;
+};
+
+export type SortOption =
+  | "User Name A-Z"
+  | "User Name Z-A"
+  | "User Id low-high"
+  | "User Id high-low"
+  | "Added latest"
+  | "Added first";

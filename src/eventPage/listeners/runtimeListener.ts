@@ -4,7 +4,7 @@ import {
   toggleEnabled,
   toggleHighlightBlocked,
   toggleHighlightFavourite,
-  switchBlocking,
+  setBlocking,
   addToBlackList,
   removeFromBlackList,
   updateBlackListUser,
@@ -26,7 +26,7 @@ const {
   TOGGLE_ENABLED,
   TOGGLE_HIGHLIGHT_BLOCKED,
   TOGGLE_HIGHLIGHT_FAVOURITE,
-  SWITCH_BLOCKING,
+  SET_BLOCKING,
   BLACKLIST_ADD,
   BLACKLIST_REMOVE,
   BLACKLIST_UPDATE_USER,
@@ -84,8 +84,8 @@ export const runtimeListener = () => (
         toggleHighlightFavourite();
         break;
 
-      case SWITCH_BLOCKING:
-        switchBlocking();
+      case SET_BLOCKING:
+        setBlocking(req.payload);
         break;
 
       case BLACKLIST_ADD:

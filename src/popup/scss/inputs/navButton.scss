@@ -1,0 +1,17 @@
+.nav-button {
+  color: $color-black-1;
+  padding: 0.3rem;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 0 0.5rem;
+}
+
+.nav-button-active {
+  position: absolute;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  border-radius: 1px;
+  background-color: $color-blue-1;
+}
