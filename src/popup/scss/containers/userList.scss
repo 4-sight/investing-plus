@@ -30,6 +30,12 @@
         box-sizing: border-box;
         width: 12rem;
         padding-right: 1rem;
+
+        .edit-user-button {
+          width: 1rem;
+          margin-left: 0.5rem;
+          color: $color-black-3;
+        }
       }
       .user-list-user-id {
         box-sizing: border-box;

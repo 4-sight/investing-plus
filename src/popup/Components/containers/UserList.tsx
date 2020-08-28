@@ -1,16 +1,18 @@
 import React from "react";
-import { Users, UserContextActions, ListName } from "../../../types";
+import { Users, UserContextActions, ListName, User } from "../../../types";
 import UserListAction from "../inputs/UserListAction";
 import TrashCan from "../../icons/TrashCan";
 import SwapArrows from "../../icons/SwapArrows";
+import Pencil from "../../icons/Pencil";
 
 interface Props {
   users: Users;
   actions: UserContextActions;
   list: ListName;
+  editUser: (user: User) => void;
 }
 
-export default function UserList({ users, actions, list }: Props) {
+export default function UserList({ users, actions, list, editUser }: Props) {
   return (
     <div className="user-list-wrapper">
       <div className="user-list-headers">
@@ -30,7 +32,19 @@ export default function UserList({ users, actions, list }: Props) {
       <div className="user-list-users">
         {users.map((user) => (
           <div className="user-list-row" data-user-id={user.id}>
-            <div className="user-list-user-name">{user.name}</div>
+            <div className="user-list-user-name">
+              {user.name}
+              <button
+                className="edit-user-button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  editUser(user);
+                }}
+              >
+                <Pencil />
+              </button>
+            </div>
+
             <div className="user-list-user-id">{user.id}</div>
             <div className="user-list-user-actions">
               <UserListAction
