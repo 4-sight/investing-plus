@@ -29,20 +29,20 @@ export default `
 }
 
 .black-list-add {
-  color: ${colors.red1};
+  color: ${colors.black3};
 }
 
 .black-list-remove {
-  color: ${colors.green1};
+  color: ${colors.red1};
   display: none;
 }
 
 .white-list-add {
-  color: ${colors.blue1};
+  color: ${colors.black3};
 }
 
 .white-list-remove {
-  color: ${colors.black3};
+  color: ${colors.blue1};
   display: none
 }
 `;
