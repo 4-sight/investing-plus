@@ -1,14 +1,14 @@
 {
   "manifest_version": 2,
 
-  "name": "Investing Discussions Plus",
-  "description": "An extension that adds extra features for the discussions section on https://investing.com",
+  "name": "Investing Plus",
+  "description": "Add extra features to investing.com, - block comments from unwanted users, highlight your favourites.",
   "version": "1.0.0",
 
   "browser_action": {
-    "default_icon": "icon16.png",
+    "default_icon": "assets/icon16.png",
     "default_popup": "popup.html",
-    "default_title": "Investing Discussions Plus"
+    "default_title": "Investing Plus"
   },
 
   "content_scripts": [
@@ -24,10 +24,10 @@
   },
 
   "icons": {
-    "16": "icon16.png",
-    "48": "icon48.png",
-    "128": "icon128.png"
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
   },
 
-  "permissions": ["activeTab", "storage", "contextMenus"]
+  "permissions": ["activeTab", "storage"]
 }

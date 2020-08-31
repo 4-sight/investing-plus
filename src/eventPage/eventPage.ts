@@ -152,9 +152,17 @@ export const toggleEnabled = () => {
 
   updateChromeStorage(["genStore"]);
 
-  generalStore.get("enabled")
-    ? portHandlers.enablePorts()
-    : portHandlers.disablePorts();
+  if (generalStore.get("enabled")) {
+    portHandlers.enablePorts();
+    chrome.browserAction.setIcon({
+      path: "/assets/icon16.png",
+    });
+  } else {
+    portHandlers.disablePorts();
+    chrome.browserAction.setIcon({
+      path: "/assets/icon-disabled16.png",
+    });
+  }
 };
 
 export const toggleHighlightBlocked = () => {

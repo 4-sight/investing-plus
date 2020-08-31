@@ -9,7 +9,9 @@ interface Props {
 export default function Header({ enabled, toggleEnabled }: Props) {
   return (
     <header className="popup-header">
-      <h1>Investing Plus</h1>
+      <h1 style={{ fontWeight: 200 }}>
+        Investing<b>Plus</b>
+      </h1>
       <PowerButton {...{ enabled, toggleEnabled }} />
     </header>
   );
