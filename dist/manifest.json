@@ -3,7 +3,7 @@
 
   "name": "Investing Plus",
   "description": "Add extra features to investing.com, - block comments from unwanted users, highlight your favourites.",
-  "version": "1.0.0",
+  "version": "1.0.2",
 
   "browser_action": {
     "default_icon": "assets/icon16.png",
